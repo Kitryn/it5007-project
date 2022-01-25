@@ -1,0 +1,23 @@
+{
+  "name": "it5007-project",
+  "version": "0.0.0",
+  "main": "index.js",
+  "author": "Yixun <snowfennard@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "client:start": "yarn workspace @it5007-project/client start",
+    "client:build": "yarn workspace @it5007-project/client build",
+    "client:test": "yarn workspace @it5007-project/client test",
+    "server:build": "yarn workspace @it5007-project/server build",
+    "server:start": "yarn workspace @it5007-project/server start"
+  },
+  "dependencies": {
+    "prettier": "^2.5.1"
+  }
+}
