@@ -6,7 +6,7 @@ This project uses yarn workspaces to segregate client and server. It assumes you
 
 ### packages/client
 
-Frontend client project, initialised with `yarn create react-app client --template typescript".
+Frontend client project, initialised with `yarn create react-app client --template typescript`.
 
 Feel free to rip this entire thing out to scaffold from scratch; the only requirement is that it builds into a `/build` folder (which will be served by the backend).
 
