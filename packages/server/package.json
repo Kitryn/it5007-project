@@ -1,5 +1,5 @@
 {
-  "name": "@it5007-project/server",
+  "name": "@soba/server",
   "version": "0.0.0",
   "main": "./dist/index.js",
   "license": "MIT",

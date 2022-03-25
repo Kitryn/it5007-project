@@ -1,5 +1,5 @@
 {
-  "name": "@it5007-project/client",
+  "name": "@soba/client",
   "version": "0.0.0",
   "license": "MIT",
   "dependencies": {
