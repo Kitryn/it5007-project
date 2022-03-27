@@ -19,6 +19,7 @@ function App() {
             return
         }
 
+        // # TODO: check if the user token is still valid? when loading from localstorage
         let _localUser
         try {
             _localUser = JSON.parse(localStorage.getItem("user") ?? "")
