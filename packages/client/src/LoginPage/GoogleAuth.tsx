@@ -1,7 +1,11 @@
-import React from "react"
+import { signInWithGoogle } from "../firebase"
 
-export default class GoogleAuth extends React.Component {
-    render() {
-        return <div className="py-3 border">GoogleAuth PlaceHolder</div>
-    }
+export default function GoogleAuth() {
+    return (
+        <div className="py-3 border">
+            <button className="button" onClick={() => signInWithGoogle()}>
+                GoogleAuth PlaceHolder
+            </button>
+        </div>
+    )
 }

@@ -1,37 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
-import { initializeApp } from "firebase/app"
-import {
-    GoogleAuthProvider,
-    getAuth,
-    signInWithPopup,
-    signOut,
-} from "firebase/auth"
 import { BrowserRouter } from "react-router-dom"
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBsZVTYn_n8Bd1ZxuMORDz8iTshv9fS_Xw",
-    authDomain: "mazesoba-345315.firebaseapp.com",
-    projectId: "mazesoba-345315",
-    storageBucket: "mazesoba-345315.appspot.com",
-    messagingSenderId: "129982544140",
-    appId: "1:129982544140:web:8bab7ec81425ea30e03129",
-    measurementId: "G-7K4RKM9Y0R",
-}
-
-const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
-const googleProvider = new GoogleAuthProvider()
-const signInWithGoogle = async () => {
-    try {
-        const res = await signInWithPopup(auth, googleProvider)
-        const user = res.user
-    } catch (err) {
-        console.error(err)
-        alert(err.message) // TODO: don't use alert
-    }
-}
 
 ReactDOM.render(
     <React.StrictMode>
