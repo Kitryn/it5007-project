@@ -1,6 +1,6 @@
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from "react-router-dom"
 import Navbar from "./components/Navbar"
-import LoginPage from './LoginPage/LoginPage';
+import LoginPage from "./LoginPage/LoginPage"
 
 function App() {
     return (
