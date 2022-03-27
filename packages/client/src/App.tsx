@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom"
 import CashPage from "./CashPage"
 import Navbar from "./components/Navbar"
 import HistoryPage from "./HistoryPage"
