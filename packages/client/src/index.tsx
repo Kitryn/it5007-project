@@ -2,6 +2,12 @@ import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
 import { initializeApp } from "firebase/app"
+import {
+    GoogleAuthProvider,
+    getAuth,
+    signInWithPopup,
+    signOut,
+} from "firebase/auth"
 import { BrowserRouter } from "react-router-dom"
 
 const firebaseConfig = {
@@ -15,6 +21,17 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+const googleProvider = new GoogleAuthProvider()
+const signInWithGoogle = async () => {
+    try {
+        const res = await signInWithPopup(auth, googleProvider)
+        const user = res.user
+    } catch (err) {
+        console.error(err)
+        alert(err.message) // TODO: don't use alert
+    }
+}
 
 ReactDOM.render(
     <React.StrictMode>
