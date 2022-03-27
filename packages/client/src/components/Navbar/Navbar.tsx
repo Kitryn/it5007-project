@@ -25,40 +25,16 @@ export default function Navbar() {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarContent">
                     <div className="navbar-nav">
-                        <NavLink
-                            className={(isActive) =>
-                                "nav-item nav-link" +
-                                (isActive ? " active" : "")
-                            }
-                            to="/wallet"
-                        >
+                        <NavLink className="nav-item nav-link" to="/wallet">
                             Wallet
                         </NavLink>
-                        <NavLink
-                            className={(isActive) =>
-                                "nav-item nav-link" +
-                                (isActive ? " active" : "")
-                            }
-                            to="/trade"
-                        >
+                        <NavLink className="nav-item nav-link" to="/trade">
                             Trade
                         </NavLink>
-                        <NavLink
-                            className={(isActive) =>
-                                "nav-item nav-link" +
-                                (isActive ? " active" : "")
-                            }
-                            to="/cash"
-                        >
+                        <NavLink className="nav-item nav-link" to="/cash">
                             Cash
                         </NavLink>
-                        <NavLink
-                            className={(isActive) =>
-                                "nav-item nav-link" +
-                                (isActive ? " active" : "")
-                            }
-                            to="/history"
-                        >
+                        <NavLink className="nav-item nav-link" to="/history">
                             History
                         </NavLink>
                     </div>
