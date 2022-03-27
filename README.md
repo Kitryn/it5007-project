@@ -36,6 +36,12 @@ $ firebase deploy
 
 7. View in prod: https://mazesoba-345315.web.app/
 
+### Adding firebase components
+
+`$ firebase init`
+
+## Project structure
+
 ### packages/client
 
 Frontend client project, initialised with `yarn create react-app client --template typescript`.
