@@ -1,5 +1,13 @@
+import { User } from "firebase/auth"
 import React from "react"
 
-export const AuthUserContext = React.createContext(null)
+interface UserStateController {
+    user: User | null
+    setUser: (user: User | null) => void
+}
+
+export const AuthUserContext = React.createContext<UserStateController | null>(
+    null
+)
 
 export const AuthUserProvider = AuthUserContext.Provider

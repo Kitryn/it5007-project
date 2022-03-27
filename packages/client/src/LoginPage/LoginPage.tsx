@@ -1,8 +1,17 @@
 import styles from "./LoginPage.module.css"
 import GoogleAuth from "./GoogleAuth"
 import AboutUs from "./AboutUs"
+import { useContext } from "react"
+import { AuthUserContext } from "../authContext"
+import { Navigate } from "react-router-dom"
 
 const LoginPage = () => {
+    const { user } = useContext(AuthUserContext) ?? {}
+    if (user) {
+        console.log(`User ${user} already logged in`)
+        return <Navigate to="/wallet" replace={true} />
+    }
+
     return (
         <div className="styles.container">
             <div className="card my-5 ">
