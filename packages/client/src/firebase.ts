@@ -33,3 +33,16 @@ export const signInWithGoogle = async () => {
         return null
     }
 }
+
+export const SignOutWithGoogle = async () => {
+    try {
+        await signOut(auth) // logging out for testing
+        console.log("signout")
+
+        return null
+    } catch (err) {
+        console.error(err)
+        alert(err.message) // TODO: don't use alert
+        return null
+    }
+}

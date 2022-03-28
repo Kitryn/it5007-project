@@ -15,7 +15,7 @@ function App() {
 
     useEffect(() => {
         if (user != null) {
-            console.log(`Already has a logged in user: ${user}`)
+            console.log(`Already has a logged in user: ${user.email}`)
             return
         }
 
