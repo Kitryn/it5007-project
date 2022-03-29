@@ -21,7 +21,7 @@ export default function Navbar() {
                 <div className="container-fluid">
                     <NavLink
                         to="/"
-                        className={(isActive) =>
+                        className={({ isActive }) =>
                             "navbar-brand" + (isActive ? " active" : "")
                         }
                     >
@@ -43,30 +43,29 @@ export default function Navbar() {
                         id="navbarContent"
                     >
                         <div className="navbar-nav  me-auto ">
-                            <NavLink
-                                className="nav-item nav-link mx-4"
-                                to="/wallet"
-                            >
-                                Wallet
-                            </NavLink>
-                            <NavLink
-                                className="nav-item nav-link mx-4"
-                                to="/trade"
-                            >
-                                Trade
-                            </NavLink>
-                            <NavLink
-                                className="nav-item nav-link mx-4"
-                                to="/cash"
-                            >
-                                Cash
-                            </NavLink>
-                            <NavLink
-                                className="nav-item nav-link mx-4"
-                                to="/history"
-                            >
-                                History
-                            </NavLink>
+                            <>
+                                {["wallet", "trade", "cash", "history"].map(
+                                    (category) => {
+                                        return (
+                                            <NavLink
+                                                key={category}
+                                                className={({ isActive }) =>
+                                                    "nav-item nav-link mx-4 " +
+                                                    (isActive
+                                                        ? " border-bottom  border-primary border-2"
+                                                        : "")
+                                                }
+                                                to={"/" + category}
+                                            >
+                                                {category
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    category.slice(1)}
+                                            </NavLink>
+                                        )
+                                    }
+                                )}
+                            </>
                         </div>
                         <div className="ms-auto d-flex">
                             <div

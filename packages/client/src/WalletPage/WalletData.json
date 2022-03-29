@@ -1,0 +1,43 @@
+{
+    "cryptoAssets": [
+        {
+            "name": "COIN1",
+            "quantityOwned": "5",
+            "currentPrice": "34.6",
+            "purchasedPrice": "20",
+            "currency": "SGD"
+        },
+
+        {
+            "name": "COIN2",
+            "quantityOwned": "2",
+            "currentPrice": "5.00",
+            "purchasedPrice": "99",
+            "currency": "SGD"
+        },
+        {
+            "name": "COIN3",
+            "quantityOwned": "1",
+            "currentPrice": "3.2",
+            "purchasedPrice": "6",
+            "currency": "SGD"
+        },
+        {
+            "name": "COIN4",
+            "quantityOwned": "8",
+            "currentPrice": "103",
+            "purchasedPrice": "215",
+            "currency": "SGD"
+        },
+        {
+            "name": "COIN5",
+            "quantityOwned": "3",
+            "currentPrice": "420",
+            "purchasedPrice": "300",
+            "currency": "SGD"
+        }
+    ],
+    "flatAssets": {
+        "SGD": "1840"
+    }
+}
