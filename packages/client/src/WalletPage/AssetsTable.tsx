@@ -1,7 +1,9 @@
-import { Map } from "typescript"
-
 export default function AssetTable({ cryptoAssets }) {
-    type Crypto = {
+    // missing state control for filter and search
+    // missing table sorting
+    // missing win lose coloring
+
+    interface Crypto {
         name: any
         quantityOwned: any
         currentPrice: any
