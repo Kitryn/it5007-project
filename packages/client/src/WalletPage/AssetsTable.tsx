@@ -5,10 +5,10 @@ export default function AssetTable({ cryptoAssets }) {
 
     interface Crypto {
         name: any
-        quantityOwned: any
-        currentPrice: any
-        purchasedPrice: any
-        currency: String
+        quantityOwned: string
+        currentPrice: string
+        purchasedPrice: string
+        currency: string
     }
 
     return (
