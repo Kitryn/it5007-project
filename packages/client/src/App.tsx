@@ -53,7 +53,7 @@ function App() {
                     }
                 />
                 <Route
-                    path="/cash"
+                    path="/cash/deposit"
                     element={
                         <RequireAuth>
                             <Navbar />
