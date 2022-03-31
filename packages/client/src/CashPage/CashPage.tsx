@@ -7,6 +7,7 @@ import {
     useParams,
     useLocation,
 } from "react-router-dom"
+import WithdrawForm from "./WithdrawForm"
 
 export default function CashPage() {
     const { pathname } = useLocation()
@@ -18,10 +19,13 @@ export default function CashPage() {
                 <div className="row m-0">
                     <div className="col py-3 border-end">
                         <NavLink
-                            to={`./deposit`}
+                            replace
+                            to="deposit"
                             className={({ isActive }) =>
-                                "cash-btn btn btn-white w-100 fs-1  fw-bold" +
-                                (isActive ? " text-dark" : "")
+                                "cash-btn btn btn-white w-100 fs-1" +
+                                (isActive
+                                    ? " text-dark fw-bold"
+                                    : " text-muted")
                             }
                         >
                             DEPOSIT
@@ -29,10 +33,12 @@ export default function CashPage() {
                     </div>
                     <div className="col py-3 border-start">
                         <NavLink
-                            to={`./withdraw`}
+                            to="withdraw"
                             className={({ isActive }) =>
-                                "cash-btn btn btn-white w-100 fs-1  fw-bold" +
-                                (isActive ? " text-muted" : "")
+                                "cash-btn btn btn-white w-100 fs-1" +
+                                (isActive
+                                    ? " text-dark fw-bold"
+                                    : " text-muted")
                             }
                         >
                             Withdraw
@@ -41,7 +47,8 @@ export default function CashPage() {
                 </div>
 
                 <Routes>
-                    <Route path={`./deposit`} element={<DepositForm />}></Route>
+                    <Route path={`deposit`} element={<DepositForm />}></Route>
+                    <Route path={`deposit`} element={<WithdrawForm />}></Route>
                 </Routes>
             </div>
         </div>

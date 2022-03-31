@@ -55,13 +55,7 @@ export default function Navbar() {
                                                         ? " border-bottom  border-primary border-2"
                                                         : "")
                                                 }
-                                                to={
-                                                    category === "cash"
-                                                        ? "/" +
-                                                          category +
-                                                          "/deposit"
-                                                        : "/" + category
-                                                }
+                                                to={"/" + category}
                                             >
                                                 {category
                                                     .charAt(0)
