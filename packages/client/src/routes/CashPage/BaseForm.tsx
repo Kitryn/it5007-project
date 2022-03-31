@@ -9,6 +9,7 @@ interface BaseFormState {
     formLabel: string
     secondaryText: string
     subscript: string
+    isDeposit: boolean
 }
 
 export default class BaseForm extends React.Component<
@@ -19,6 +20,7 @@ export default class BaseForm extends React.Component<
     constructor(props: BaseFormProps) {
         super(props)
         this.state = {
+            isDeposit: this.props.isDeposit,
             formLabel: this.props.isDeposit ? "Deposit" : "Withdraw",
             secondaryText: this.props.isDeposit
                 ? "Deposit money into your account"
