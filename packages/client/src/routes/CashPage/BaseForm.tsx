@@ -19,16 +19,6 @@ export default class BaseForm extends React.Component<
     private inputElRef: React.RefObject<HTMLInputElement>
     constructor(props: BaseFormProps) {
         super(props)
-        this.state = {
-            isDeposit: this.props.isDeposit,
-            formLabel: this.props.isDeposit ? "Deposit" : "Withdraw",
-            secondaryText: this.props.isDeposit
-                ? "Deposit money into your account"
-                : "Withdraw money from your account",
-            subscript: this.props.isDeposit
-                ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
-                : "*Cash withdrawn may process upto 7 working days",
-        }
 
         this.inputElRef = React.createRef()
     }
@@ -43,12 +33,20 @@ export default class BaseForm extends React.Component<
     }
 
     render() {
+        const { isDeposit } = this.props
+        const formLabel = isDeposit ? "Deposit" : "Withdraw"
+        const secondaryText = isDeposit
+            ? "Deposit money into your account"
+            : "Withdraw money from your account"
+        const subscript = isDeposit
+            ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
+            : "*Cash withdrawn may process upto 7 working days"
         return (
             <form name="depositForm" autoComplete="off">
                 <div className="cash-display bg-primary ">
                     <div className="row mx-5 pt-5">
                         <div className="span fs-4 text-white">
-                            {this.state.formLabel} Amount (SGD)
+                            {formLabel} Amount (SGD)
                         </div>
                     </div>
                     <div className="row mx-5 my-4">
@@ -82,7 +80,7 @@ export default class BaseForm extends React.Component<
                 </div>
                 <div className="row text-center p-1 ">
                     <span className="text-secondary ">
-                        <em>{this.state.subscript}</em>
+                        <em>{subscript}</em>
                     </span>
                 </div>
                 <div className="row p-5">
@@ -91,9 +89,7 @@ export default class BaseForm extends React.Component<
                             type="submit"
                             className="btn btn-outline-primary pushable "
                         >
-                            <span className="front">
-                                {this.state.formLabel}
-                            </span>
+                            <span className="front">{formLabel}</span>
                         </button>
                     </div>
                 </div>
