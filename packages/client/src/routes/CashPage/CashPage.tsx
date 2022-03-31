@@ -1,4 +1,5 @@
 import BaseForm from "./BaseForm"
+import "./tab.css"
 
 export default function CashPage() {
     return (
@@ -9,9 +10,9 @@ export default function CashPage() {
                     id="cash-form"
                     role="tablist"
                 >
-                    <li className="nav-item p-2 fs-5" role="presentation">
+                    <li className="nav-item p-4 fs-5 " role="presentation">
                         <button
-                            className="nav-link active px-5"
+                            className="nav-link active px-5 deposit-btn w-100 fs-1 bg-white text-muted "
                             id="deposit-tab"
                             data-bs-toggle="pill"
                             data-bs-target="#deposit-form"
@@ -23,9 +24,9 @@ export default function CashPage() {
                             Deposit
                         </button>
                     </li>
-                    <li className="nav-item p-2 fs-5" role="presentation">
+                    <li className="nav-item p-4 fs-5" role="presentation">
                         <button
-                            className="nav-link px-5"
+                            className="nav-link px-5 withdraw-btn w-100 fs-1 bg-white text-muted"
                             id="withdraw-tab"
                             data-bs-toggle="pill"
                             data-bs-target="#withdraw-form"

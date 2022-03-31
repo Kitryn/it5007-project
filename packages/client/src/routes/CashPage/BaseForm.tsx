@@ -1,13 +1,18 @@
 import "./form.css"
+import { useRef } from "react"
+
+
 
 export default function BaseForm({ isDeposit }: { isDeposit: boolean }) {
+
+
     const formLabel = isDeposit ? "Deposit" : "Withdraw"
     const secondaryText = isDeposit
         ? "Deposit money into your account"
         : "Withdraw money from your account"
     const subscript = isDeposit
         ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
-        : ""
+        : "*Cash withdrawn may process upto 7 working days"
 
     return (
         <form name="depositForm" autoComplete="off">
