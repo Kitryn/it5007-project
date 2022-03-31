@@ -27,8 +27,6 @@ export default class BaseForm extends React.Component<
         const node = this.inputElRef.current
 
         if (node) {
-            console.log(node?.focus)
-
             node.focus()
         }
     }
