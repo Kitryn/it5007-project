@@ -6,8 +6,6 @@ export default function CashPage() {
     const [isDeposit, setIsDeposit] = useState(true)
 
     function onClickHandler(isDeposit: boolean) {
-        console.log(isDeposit)
-
         setIsDeposit(isDeposit)
     }
 

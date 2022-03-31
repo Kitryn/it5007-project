@@ -23,11 +23,12 @@ export default class BaseForm extends React.Component<
         this.inputElRef = React.createRef()
     }
 
-    componentDidMount() {
+    componentDidUpdate() {
         const node = this.inputElRef.current
-        console.log(node)
 
         if (node) {
+            console.log(node?.focus)
+
             node.focus()
         }
     }
