@@ -1,5 +1,6 @@
 import HistoryRow from "./HistoryRow"
 import DatePicker from "../../components/DatePicker"
+import SearchBar from "../../components/SearchBar"
 import "./HistoryPage.css"
 import React from "react"
 
@@ -11,13 +12,13 @@ export default function HistoryPage() {
     return (
         <div className="container d-flex flex-column">
             <div className="row header">
-                <div className="col-9 bg-white px-3 py-2 m-2 flex-grow-1 border rounded-pill d-flex justify-content-between align-items-center">
+                <div className="col-9 bg-white px-5 py-2 m-2 flex-grow-1 border rounded-pill d-flex justify-content-between align-items-center">
                     <DatePicker />
-                    <div className="col-2 text-center">to</div>
+                    <div className="col-2 text-center fw-bold">to</div>
                     <DatePicker />
                 </div>
-                <div className="col-2 bg-white px-3 py-2 m-2 border rounded-pill">
-                    searchbar
+                <div className="col-2 bg-white px-4 py-2 m-2 border rounded-pill">
+                    <SearchBar />
                 </div>
             </div>
             <div className="row flex-grow-1">
