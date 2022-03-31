@@ -19,6 +19,7 @@ RUN echo "Building server" \
 
 RUN cp -r ./packages/client/build ./packages/server/build
 
-EXPOSE 5000
+EXPOSE 3000
 
-CMD ["yarn", "server:start"]
+# CMD ["yarn", "server:start"]
+CMD ["yarn", "client:start"]

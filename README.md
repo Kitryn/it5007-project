@@ -52,11 +52,10 @@ Feel free to rip this entire thing out to scaffold from scratch; the only requir
 
 express.js based backend. Pending addition of MongoDB
 
-```
-$ docker build --tag it5007 .
-$ docker run --publish 5000:5000 it5007
+### Running client locally with docker
 
-# Stopping
-$ docker ps
-$ docker stop <containerid>
+```
+$ docker build --tag mazesoba .
+$ docker run --init -it --publish 3000:3000 mazesoba
+
 ```
