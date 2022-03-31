@@ -1,6 +1,6 @@
 import { useContext } from "react"
-import { AuthUserContext } from "../authContext"
-import { signInWithGoogle } from "../firebase"
+import { AuthUserContext } from "../../authContext"
+import { signInWithGoogle } from "../../firebase"
 
 export default function GoogleAuth() {
     const { user, setUser } = useContext(AuthUserContext) ?? {

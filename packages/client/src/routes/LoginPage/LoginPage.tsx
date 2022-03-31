@@ -1,7 +1,7 @@
 import GoogleAuth from "./GoogleAuth"
 import AboutUs from "./AboutUs"
 import { useContext } from "react"
-import { AuthUserContext } from "../authContext"
+import { AuthUserContext } from "../../authContext"
 import { Navigate } from "react-router-dom"
 
 const LoginPage = () => {

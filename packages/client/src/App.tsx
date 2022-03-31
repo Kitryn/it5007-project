@@ -2,13 +2,13 @@ import { User } from "firebase/auth"
 import { useEffect, useState } from "react"
 import { Route, Routes } from "react-router-dom"
 import { AuthUserContext } from "./authContext"
-import CashPage from "./CashPage"
+import CashPage from "./routes/CashPage"
 import Navbar from "./components/Navbar"
 import RequireAuth from "./components/RequireAuth"
-import HistoryPage from "./HistoryPage"
-import LoginPage from "./LoginPage"
-import TradePage from "./TradePage"
-import WalletPage from "./WalletPage"
+import HistoryPage from "./routes/HistoryPage"
+import LoginPage from "./routes/LoginPage"
+import TradePage from "./routes/TradePage"
+import WalletPage from "./routes/WalletPage"
 
 function App() {
     const [user, setUser] = useState<User | null>(null)
