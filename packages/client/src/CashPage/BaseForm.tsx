@@ -1,12 +1,20 @@
 import "./form.css"
 
-export default function DepositForm() {
+export default function BaseForm({ isDeposit }: { isDeposit: boolean }) {
+    const formLabel = isDeposit ? "Deposit" : "Withdraw"
+    const secondaryText = isDeposit
+        ? "Deposit money into your account"
+        : "Withdraw money from your account"
+    const subscript = isDeposit
+        ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
+        : ""
+
     return (
         <form name="depositForm" autoComplete="off">
             <div className="cash-display bg-primary ">
                 <div className="row mx-5 pt-5">
                     <div className="span fs-4 text-white">
-                        Deposit Amount (SGD)
+                        {formLabel} Amount (SGD)
                     </div>
                 </div>
                 <div className="row mx-5 my-4">
@@ -39,10 +47,7 @@ export default function DepositForm() {
             </div>
             <div className="row text-center p-1 ">
                 <span className="text-secondary ">
-                    <em>
-                        *Please keep sufficient funds in your bank account to
-                        avoid rejection or overdraft
-                    </em>
+                    <em>{subscript}</em>
                 </span>
             </div>
             <div className="row p-5">
@@ -51,7 +56,7 @@ export default function DepositForm() {
                         type="submit"
                         className="btn btn-outline-primary pushable "
                     >
-                        <span className="front">Deposit</span>
+                        <span className="front">{formLabel}</span>
                     </button>
                 </div>
             </div>
