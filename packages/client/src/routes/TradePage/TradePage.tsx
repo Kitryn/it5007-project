@@ -22,7 +22,10 @@ function SwapForm() {
     const outputRef = useRef<HTMLInputElement>(null)
 
     return (
-        <form className="form-floating mb-3 d-flex flex-column align-items-center">
+        <form
+            className="form-floating mb-3 d-flex flex-column align-items-center"
+            id="swapForm"
+        >
             <div className="input-group my-3 input-group-lg">
                 <input
                     className="form-control position-relative"
