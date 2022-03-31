@@ -1,7 +1,16 @@
 import BaseForm from "./BaseForm"
 import "./tab.css"
+import React, { useState } from "react"
 
 export default function CashPage() {
+    const [isDeposit, setIsDeposit] = useState(true)
+
+    function onClickHandler(isDeposit: boolean) {
+        console.log(isDeposit)
+
+        setIsDeposit(isDeposit)
+    }
+
     return (
         <div className="container">
             <div className="card">
@@ -20,6 +29,7 @@ export default function CashPage() {
                             role="tab"
                             aria-controls="deposit-form"
                             aria-selected="true"
+                            onClick={() => onClickHandler(true)}
                         >
                             Deposit
                         </button>
@@ -34,6 +44,7 @@ export default function CashPage() {
                             role="tab"
                             aria-controls="withdraw-form"
                             aria-selected="false"
+                            onClick={() => onClickHandler(false)}
                         >
                             Withdraw
                         </button>
@@ -46,7 +57,7 @@ export default function CashPage() {
                         role="tabpanel"
                         aria-labelledby="deposit-form-tab"
                     >
-                        <BaseForm isDeposit />
+                        <BaseForm isDeposit={isDeposit} />
                     </div>
                     <div
                         className="tab-pane fade"
@@ -54,7 +65,7 @@ export default function CashPage() {
                         role="tabpanel"
                         aria-labelledby="withdraw-form-tab"
                     >
-                        <BaseForm isDeposit={false} />
+                        <BaseForm isDeposit={isDeposit} />
                     </div>
                 </div>
             </div>
