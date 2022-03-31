@@ -4,37 +4,56 @@ export default function CashPage() {
     return (
         <div className="container">
             <div className="card">
-                {/** Bootstrap tabbed pane for displaying deposit form and withdraw form on this page*/}
-                <div className="card-header">
-                    <ul className="nav nav-tabs card-header-tabs">
-                        <li className="nav-item">
-                            <a
-                                className="nav-link active"
-                                href="#deposit"
-                                data-toggle="tab"
-                            >
-                                Deposit
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a
-                                className="nav-link"
-                                href="#withdraw"
-                                data-toggle="tab"
-                            >
-                                Withdraw
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div className="card-body">
-                    <div className="tab-content">
-                        <div className="tab-pane active" id="deposit">
-                            <BaseForm isDeposit={true} />
-                        </div>
-                        <div className="tab-pane" id="withdraw">
-                            <BaseForm isDeposit={false} />
-                        </div>
+                <ul
+                    className="nav nav-pills d-flex flex-row justify-content-around"
+                    id="cash-form"
+                    role="tablist"
+                >
+                    <li className="nav-item p-2 fs-5" role="presentation">
+                        <button
+                            className="nav-link active px-5"
+                            id="deposit-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#deposit-form"
+                            type="button"
+                            role="tab"
+                            aria-controls="deposit-form"
+                            aria-selected="true"
+                        >
+                            Deposit
+                        </button>
+                    </li>
+                    <li className="nav-item p-2 fs-5" role="presentation">
+                        <button
+                            className="nav-link px-5"
+                            id="withdraw-tab"
+                            data-bs-toggle="pill"
+                            data-bs-target="#withdraw-form"
+                            type="button"
+                            role="tab"
+                            aria-controls="withdraw-form"
+                            aria-selected="false"
+                        >
+                            Withdraw
+                        </button>
+                    </li>
+                </ul>
+                <div className="tab-content" id="myTabContent">
+                    <div
+                        className="tab-pane fade show active"
+                        id="deposit-form"
+                        role="tabpanel"
+                        aria-labelledby="deposit-form-tab"
+                    >
+                        <BaseForm isDeposit />
+                    </div>
+                    <div
+                        className="tab-pane fade"
+                        id="withdraw-form"
+                        role="tabpanel"
+                        aria-labelledby="withdraw-form-tab"
+                    >
+                        <BaseForm isDeposit={false} />
                     </div>
                 </div>
             </div>
