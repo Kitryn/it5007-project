@@ -1,5 +1,6 @@
 import "./form.css"
 import React, { useRef } from "react"
+import PushableButton from "../../components/UI/PushableButton"
 
 interface BaseFormProps {
     isDeposit: boolean
@@ -84,12 +85,7 @@ export default class BaseForm extends React.Component<
                 </div>
                 <div className="row p-5">
                     <div className="d-grid gap-2 col-6 mx-auto ">
-                        <button
-                            type="submit"
-                            className="btn btn-outline-primary pushable "
-                        >
-                            <span className="front">{formLabel}</span>
-                        </button>
+                        <PushableButton>{formLabel}</PushableButton>
                     </div>
                 </div>
             </form>

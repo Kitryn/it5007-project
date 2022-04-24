@@ -1,23 +1,99 @@
 import { useRef } from "react"
 
-export default function TradePage() {
+import "./tab.css"
+import React, { useState } from "react"
+import SwapForm from "./SwapForm"
+
+export default function CashPage() {
+    interface TabState {
+        isBuy: boolean
+        isSell: boolean
+        isSwap: boolean
+    }
+    const [tabState, setTabState] = useState<TabState>({
+        isBuy: true,
+        isSell: false,
+        isSwap: false,
+    })
+
+    const [activeTab, setActiveTab] = useState("Buy")
+
+    function onClickHandler(e: any, newState: TabState) {
+        setActiveTab(e.target.innerText)
+        setTabState(newState)
+    }
+
     return (
         <div className="container">
-            <div className="row justify-content-center">
-                <div className="col-6 border border-primary rounded-3 bg-light">
-                    <div className="col bg-primary py-3 px-4 mt-4 mx-4 text-white">
-                        <span className="fs-3">Swap</span>
+            <div className="card">
+                <div className="row m-0">
+                    <div className="col py-3 border-end">
+                        <button
+                            onClick={(e) =>
+                                onClickHandler(e, {
+                                    isBuy: true,
+                                    isSell: false,
+                                    isSwap: false,
+                                })
+                            }
+                            className={
+                                "cash-btn btn btn-white w-100 fs-1" +
+                                (tabState.isBuy
+                                    ? " text-dark fw-bold"
+                                    : " text-muted")
+                            }
+                        >
+                            Buy
+                        </button>
                     </div>
-                    <div className="col text-dark p-4">
-                        <SwapForm />
+                    <div className="col py-3 border-start">
+                        <button
+                            onClick={(e) =>
+                                onClickHandler(e, {
+                                    isBuy: false,
+                                    isSell: true,
+                                    isSwap: false,
+                                })
+                            }
+                            className={
+                                "cash-btn btn btn-white w-100 fs-1" +
+                                (tabState.isSell
+                                    ? " text-dark fw-bold"
+                                    : " text-muted")
+                            }
+                        >
+                            Sell
+                        </button>
                     </div>
+                    <div className="col py-3 border-start">
+                        <button
+                            onClick={(e) =>
+                                onClickHandler(e, {
+                                    isBuy: false,
+                                    isSell: false,
+                                    isSwap: true,
+                                })
+                            }
+                            className={
+                                "cash-btn btn btn-white w-100 fs-1" +
+                                (tabState.isSwap
+                                    ? " text-dark fw-bold"
+                                    : " text-muted")
+                            }
+                        >
+                            Swap
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <SwapForm selected={activeTab}></SwapForm>
                 </div>
             </div>
         </div>
     )
 }
 
-function SwapForm() {
+function SwapForm_() {
     const inputRef = useRef<HTMLInputElement>(null)
     const outputRef = useRef<HTMLInputElement>(null)
 
