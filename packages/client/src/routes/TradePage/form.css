@@ -5,7 +5,7 @@
     box-shadow: none;
 }
 
-input:focus {
+.swap-form input:focus {
     outline: none;
     box-shadow: none;
     font-size: 3em;

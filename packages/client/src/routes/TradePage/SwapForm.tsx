@@ -22,7 +22,7 @@ const SwapForm = ({ selected }) => {
     return (
         <>
             <div
-                className="row py-1 px-5 bg-primary m-0"
+                className="row py-1 px-5 bg-primary m-0 swap-form"
                 style={{
                     height: 180,
                 }}
