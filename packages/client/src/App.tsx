@@ -9,6 +9,7 @@ import HistoryPage from "./routes/HistoryPage"
 import LoginPage from "./routes/LoginPage"
 import TradePage from "./routes/TradePage"
 import WalletPage from "./routes/WalletPage"
+import LiquidityPage from "./routes/LiquidityPage"
 
 function App() {
     const [user, setUser] = useState<User | null>(null)
@@ -49,6 +50,15 @@ function App() {
                         <RequireAuth>
                             <Navbar />
                             <TradePage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
+                    path="/liquidity"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <LiquidityPage />
                         </RequireAuth>
                     }
                 />
