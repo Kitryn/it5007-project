@@ -14,7 +14,9 @@ export default function HistoryPage() {
             <div className="row header">
                 <div className="col-9 bg-white px-5 py-2 m-2 flex-grow-1 border rounded-pill d-flex justify-content-between align-items-center">
                     <DatePicker />
-                    <div className="col-2 text-center fw-bold">to</div>
+                    <div className="col-2 text-center fw-bold text-muted">
+                        to
+                    </div>
                     <DatePicker />
                 </div>
                 <div className="col-2 bg-white px-4 py-2 m-2 border rounded-pill">
@@ -22,18 +24,18 @@ export default function HistoryPage() {
                 </div>
             </div>
             <div className="row flex-grow-1">
-                <div className="col-12 h-100 container-fluid">
+                <div className="col-12 h-100 container-fluid text-muted">
                     <div className="row">
-                        <div className="col-4 bg-white border history-header-element">
+                        <div className="col-4 bg-white border  history-header-element">
                             Name
                         </div>
-                        <div className="col-2 bg-white border history-header-element">
+                        <div className="col-2 bg-white border  history-header-element">
                             Amount
                         </div>
-                        <div className="col-3 bg-white border history-header-element">
+                        <div className="col-3 bg-white border  history-header-element">
                             Filled
                         </div>
-                        <div className="col-3 bg-white border history-header-element">
+                        <div className="col-3 bg-white border  history-header-element">
                             Time
                         </div>
                     </div>
