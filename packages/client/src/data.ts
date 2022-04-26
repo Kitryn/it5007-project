@@ -18,7 +18,7 @@ export interface Wallet {
     crypto: string
     earning: string
     coin_qty: CoinBalance[]
-}
+} 
 
 /**
  * each coin the user owned is represented as a CoinBalance Object

@@ -1,14 +1,15 @@
-export default function AssetTable({ cryptoAssets }) {
+import { CoinBalance } from "../../data"
+
+export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
     // missing state control for filter and search
     // missing table sorting
     // missing win lose coloring
+    function onSubmit(e: any) {
+        e.preventDefault()
+        const form = document.forms.namedItem("searchForm")
+        const searchTerm = form?.searchTerm.value
 
-    interface Crypto {
-        name: any
-        quantityOwned: string
-        currentPrice: string
-        purchasedPrice: string
-        currency: string
+        onSearchSubmitHandler(searchTerm.toLowerCase())
     }
 
     return (
@@ -16,13 +17,17 @@ export default function AssetTable({ cryptoAssets }) {
             <table className="table">
                 <thead>
                     <tr>
-                        <th className="align-middle">Name</th>
-                        <th className="align-middle">Qty</th>
+                        <th className="text-end">Name</th>
+                        <th className="text-end">Qty</th>
 
-                        <th className="align-middle">Balance</th>
-                        <th className="align-middle">Earning</th>
+                        <th className="text-end">Balance</th>
+                        <th className="text-end">Earning</th>
                         <th>
-                            <form className="d-flex ">
+                            <form
+                                className="d-flex"
+                                onSubmit={onSubmit}
+                                id="searchForm"
+                            >
                                 <button className="btn " type="submit">
                                     <i className="bi bi-search"></i>
                                 </button>
@@ -31,39 +36,48 @@ export default function AssetTable({ cryptoAssets }) {
                                     type="search"
                                     placeholder="Search"
                                     aria-label="Search"
+                                    name="searchTerm"
                                 ></input>
                             </form>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {cryptoAssets.map((crypto: Crypto) => (
+                    {cryptoAssets.map((crypto: CoinBalance) => (
                         <tr key={crypto.name}>
-                            <td>{crypto.name}</td>
-                            <td>{crypto.quantityOwned}</td>
-                            <td>
-                                {(
-                                    parseFloat(crypto.quantityOwned) *
-                                    parseFloat(crypto.currentPrice)
-                                ).toFixed(2)}
+                            <td className="text-end">
+                                {crypto.name.toUpperCase()}
                             </td>
-                            <td>
-                                {(
-                                    parseFloat(crypto.quantityOwned) *
-                                        parseFloat(crypto.currentPrice) -
-                                    parseFloat(crypto.quantityOwned) *
-                                        parseFloat(crypto.purchasedPrice)
-                                ).toFixed(2)}
+                            <td className="text-end">
+                                {parseFloat(crypto.qty).toFixed(2)}
                             </td>
-                            <td>
-                                <div className="row ms-auto">
-                                    <div className="col-5 d-grid">
-                                        <button className="btn btn-outline-primary">
+                            <td className="text-end">
+                                {parseFloat(crypto.value).toFixed(2)}
+                            </td>
+                            <td
+                                className={`text-end ${
+                                    parseFloat(crypto.earning) >= 0
+                                        ? "text-success"
+                                        : "text-danger"
+                                }`}
+                            >
+                                {parseFloat(crypto.earning).toFixed(2)}
+                            </td>
+                            <td className="">
+                                <div className="row ps-5">
+                                    <div className="col-6 d-grid ">
+                                        <button
+                                            className="btn btn-outline-primary"
+                                            style={{ width: "80px" }}
+                                        >
                                             Send
                                         </button>
                                     </div>
-                                    <div className="col-5 d-grid">
-                                        <button className="btn btn-outline-primary">
+                                    <div className="col-6 d-grid ">
+                                        <button
+                                            className="btn btn-outline-primary"
+                                            style={{ width: "80px" }}
+                                        >
                                             Receive
                                         </button>
                                     </div>
