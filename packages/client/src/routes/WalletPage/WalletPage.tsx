@@ -94,28 +94,31 @@ export default function WalletPage() {
                                 </div>
                                 <div className="row row-cols-6 g-1 ">
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/buy"
                                             className="text-decoration-none text-muted"
                                         >
                                             Buy
-                                        </a>
+                                        </Link>
                                     </div>
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/sell"
                                             className="text-decoration-none text-muted"
                                         >
                                             Sell
-                                        </a>
+                                        </Link>
                                     </div>
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/swap"
                                             className="text-decoration-none text-muted"
                                         >
                                             Swap
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -159,12 +162,13 @@ export default function WalletPage() {
                                     </div>
                                     <div className="row">
                                         <div className="col">
-                                            <a
-                                                href="#"
+                                            <Link
+                                                type={"a"}
+                                                to="/history"
                                                 className="text-decoration-none text-muted"
                                             >
-                                                View Portfolio
-                                            </a>
+                                                View History
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>

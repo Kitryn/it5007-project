@@ -44,6 +44,7 @@ const SwapForm = ({ selected }) => {
                                     width: "9em",
                                     fontSize: "3em",
                                 }}
+                                placeholder="0.00"
                                 autoFocus
                                 ref={upperRef}
                             ></input>
@@ -107,6 +108,7 @@ const SwapForm = ({ selected }) => {
                                         width: "9em",
                                         fontSize: "3em",
                                     }}
+                                    placeholder="0.00"
                                     ref={lowerRef}
                                 ></input>
                             </div>

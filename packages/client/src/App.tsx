@@ -54,6 +54,15 @@ function App() {
                     }
                 />
                 <Route
+                    path="/trade/:operation"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <TradePage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
                     path="/liquidity"
                     element={
                         <RequireAuth>

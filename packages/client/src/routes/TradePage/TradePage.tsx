@@ -3,6 +3,7 @@ import { useRef } from "react"
 import "./tab.css"
 import React, { useState } from "react"
 import SwapForm from "./SwapForm"
+import { useParams } from "react-router-dom"
 
 export default function CashPage() {
     interface TabState {
@@ -10,10 +11,12 @@ export default function CashPage() {
         isSell: boolean
         isSwap: boolean
     }
+    const { operation } = useParams()
+
     const [tabState, setTabState] = useState<TabState>({
-        isBuy: true,
-        isSell: false,
-        isSwap: false,
+        isBuy: operation === "buy" || operation === undefined,
+        isSell: operation === "sell",
+        isSwap: operation === "swap",
     })
 
     const [activeTab, setActiveTab] = useState("Buy")
