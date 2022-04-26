@@ -72,6 +72,15 @@ function App() {
                     }
                 />
                 <Route
+                    path="/cash/:tab"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <CashPage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
                     path="/history"
                     element={
                         <RequireAuth>

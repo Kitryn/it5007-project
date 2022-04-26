@@ -18,12 +18,12 @@ export default function GoogleSignOut({ className, setUser }) {
     }
 
     return (
-        <button
-            className={className}
-            type="button"
-            onClick={() => signOutAndSetState()}
-        >
-            Sign Out
-        </button>
+        <>
+            <i
+                className="bi bi-box-arrow-right pe-2"
+                onClick={() => signOutAndSetState()}
+                style={{ cursor: "pointer" }}
+            ></i>
+        </>
     )
 }

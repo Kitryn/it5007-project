@@ -70,24 +70,18 @@ export default function Navbar() {
                             </>
                         </div>
                         <div className="ms-auto d-flex">
-                            <div
-                                style={{ height: "45px", width: "45px" }}
-                                className="border bg-white rounded-circle me-2"
-                            >
-                                <img
-                                    src={user?.photoURL ?? undefined}
-                                    className="img-fluid rounded-circle border"
-                                    // alt="Avater Icon"
-                                />
-                            </div>
-                            <div className="col" style={{ fontSize: "12px" }}>
-                                <div className="">
-                                    Welcome {user?.displayName ?? ""} !
+                            <div className="row">
+                                <div className="col p-0 fs-5 text-primary me-3">
+                                    {(user?.displayName ?? "")
+                                        .split(" ")
+                                        .at(-1)}
                                 </div>
-                                <GoogleSignOut
-                                    className="btn btn-link"
-                                    setUser={setUser}
-                                />
+                                <div className="col text-danger fs-5">
+                                    <GoogleSignOut
+                                        className="btn btn-link"
+                                        setUser={setUser}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -40,7 +40,9 @@ export default class BaseForm extends React.Component<
             : "Withdraw money from your account"
         const subscript = isDeposit
             ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
-            : "*Cash withdrawn may process upto 7 working days"
+            : "*Cash withdrawn may process up to 7 working days"
+
+        // Missing maximum withdraw limit check
         return (
             <form name="depositForm" autoComplete="off">
                 <div className="cash-display bg-primary ">
@@ -66,6 +68,7 @@ export default class BaseForm extends React.Component<
                                         width: "9em",
                                         fontSize: "4em",
                                     }}
+                                    placeholder="0.00"
                                     maxLength={9}
                                     autoFocus
                                 />

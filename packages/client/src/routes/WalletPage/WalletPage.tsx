@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import AssetTable from "./AssetsTable"
 import walletData from "./WalletData.json"
 
@@ -60,20 +61,22 @@ export default function WalletPage() {
                             </div>
                             <div className="row row-cols-5 g-1 ">
                                 <div className="col">
-                                    <a
-                                        href="#"
+                                    <Link
+                                        type={"a"}
+                                        to="/cash/deposit"
                                         className="text-decoration-none text-muted"
                                     >
                                         Deposit
-                                    </a>
+                                    </Link>
                                 </div>
                                 <div className="col">
-                                    <a
-                                        href="#"
+                                    <Link
+                                        type={"a"}
+                                        to="/cash/withdraw"
                                         className="text-decoration-none text-muted"
                                     >
                                         Withdraw
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
