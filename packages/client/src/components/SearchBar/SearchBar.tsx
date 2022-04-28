@@ -1,4 +1,8 @@
-export default function SearchBar() {
+export default function SearchBar({ setSearchState }) {
+    function onChangeHandler(e: any) {
+        setSearchState(e.target.value.toUpperCase())
+    }
+
     return (
         <div className="form-group">
             <div className="input-group">
@@ -12,9 +16,12 @@ export default function SearchBar() {
                 </div>
                 <input
                     type="search"
-                    className="form-control border-0 border-bottom"
+                    className="form-control border-0 border-bottom text-uppercase"
                     aria-label="Default"
                     aria-describedby="inputGroup-sizing-default"
+                    placeholder="ETH"
+                    onChange={(e) => onChangeHandler(e)}
+                    maxLength={5}
                 />
             </div>
         </div>

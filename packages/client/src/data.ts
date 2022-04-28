@@ -51,7 +51,6 @@ export interface Route {
     price: string
     slippage: string
     fee: string
-    route: string[]
 }
 
 /**
