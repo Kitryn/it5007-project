@@ -22,7 +22,7 @@ import {
 import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
-import { addLiquidity, createPair, getPrices, swap } from "./models/pool";
+import { addLiquidity, calculateLpTokenShare, createPair, getPrices, swap } from "./models/pool";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
@@ -205,9 +205,61 @@ app.get("/api/getStaked", [isLoggedInMiddleware], async (req: Request, res: Resp
   try {
     const uid = req.decodedToken!.uid;
 
-    const staked = await getLpBalances(connection, uid);
+    let staked = (await getLpBalances(connection, uid)).map((v) => {
+      return {
+        ...v,
+        amount: new BigNumber(v.amount).dividedBy(EXPONENT.toString()).toString(),
+      };
+    });
 
     res.send(staked);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * Calculate the value of liquidity tokens
+ * LP symbol should be passed in query string
+ */
+app.get("/api/getLiquidityValue", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+
+    const { ccy } = req.query;
+    if (ccy == null) {
+      return res.status(400).send("Ccy is required");
+    }
+
+    const lpBalance = (await getLpBalances(connection, uid)).filter((v) => v.symbol === ccy).map((v) => v.amount)[0];
+    if (lpBalance == null) {
+      return res.status(400).send("No liquidity token found");
+    }
+
+    const lpValue = await calculateLpTokenShare(connection, ccy.toString(), BigInt(lpBalance));
+
+    const prices = (await getPrices(connection, [lpValue.ccy1, lpValue.ccy2])).reduce((acc, curr) => {
+      acc.set(curr.ccy, curr.price);
+      return acc;
+    }, new Map<string, number>());
+
+    const response = {
+      base: lpValue.ccy1,
+      quote: lpValue.ccy2,
+      baseAmount: new BigNumber(lpValue.reserve1).dividedBy(EXPONENT.toString()).toString(),
+      quoteAmount: new BigNumber(lpValue.reserve2).dividedBy(EXPONENT.toString()).toString(),
+      baseValue: new BigNumber(lpValue.reserve1)
+        .multipliedBy(prices.get(lpValue.ccy1)!)
+        .dividedBy(EXPONENT.toString())
+        .toString(),
+      quoteValue: new BigNumber(lpValue.reserve2)
+        .multipliedBy(prices.get(lpValue.ccy2)!)
+        .dividedBy(EXPONENT.toString())
+        .toString(),
+    };
+
+    res.send(response);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
