@@ -22,7 +22,15 @@ import {
 import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
-import { addLiquidity, calculateLpTokenShare, createPair, getPrices, removeLiquidity, swap } from "./models/pool";
+import {
+  addLiquidity,
+  calculateLpTokenShare,
+  createPair,
+  getPrices,
+  getQuote,
+  removeLiquidity,
+  swap,
+} from "./models/pool";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
@@ -420,6 +428,33 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
     await removeLiquidity(connection, uid, ccy, BigInt(amt));
 
     res.send("OK");
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * GET request for getting swap quotes
+ * URL query params: base, quote, amount, isBuy
+ */
+app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    let { base, quote, amount, isBuy } = req.query;
+
+    if (base == null || quote == null || amount == null || isBuy == null) {
+      return res.status(400).send("Missing params");
+    }
+
+    if (isBuy !== "true" && isBuy !== "false") {
+      return res.status(400).send("Invalid isBuy");
+    }
+    const isBuyBool = isBuy === "true";
+    const amt = new BigNumber(amount.toString()).multipliedBy(EXPONENT.toString()).toString();
+
+    const quoteRes = await getQuote(connection, base.toString(), quote.toString(), BigInt(amt), isBuyBool);
+
+    res.send(quoteRes);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
