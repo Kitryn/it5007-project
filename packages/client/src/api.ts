@@ -289,19 +289,18 @@ export async function getQuote(
         return null
     }
 
-    const res = await fetch("/api/quote", {
-        method: "POST",
+    const _params = new URLSearchParams({
+        base,
+        quote,
+        ...(isBuy ? { isBuy: "true" } : { isBuy: "false" }),
+        ...(amountBase != null ? { amountBase: amountBase.toString() } : {}),
+        ...(amountQuote != null ? { amountQuote: amountQuote.toString() } : {}),
+    })
+
+    const res = await fetch("/api/quote?" + _params, {
         headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-            base,
-            quote,
-            isBuy,
-            ...(amountBase ? { amountBase } : {}),
-            ...(amountQuote ? { amountQuote } : {}),
-        }),
     })
     console.log(res)
     return await res.json()
