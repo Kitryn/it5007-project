@@ -7,19 +7,19 @@ dotenv.config({
 import express from "express";
 import { Request, Response } from "express";
 import { applicationDefault, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
 import mysql from "mysql2";
 
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
-import { getCoinBalances, getLpBalances, getLpCoinValues, getTransactionHistory, upsertBalance } from "./models/wallet";
-import { CoinBalance, Wallet } from "./types";
+import { getCoinBalances, getLpCoinValues, getTransactionHistory, upsertBalance, upsertRequest } from "./models/wallet";
+import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
 import { addLiquidity, createPair, getPrices, swap } from "./models/pool";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
+const HOT_WALLET = "0x0d7b26Bfa1D36e648513a80c8D6172583E7a2c5E";
 
 if (process.env.NODE_ENV !== "production") {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
@@ -32,8 +32,6 @@ if (process.env.NODE_ENV !== "production") {
 initializeApp({
   credential: applicationDefault(),
 });
-
-const defaultAuth = getAuth();
 
 // Create the MySQL connection to Google Cloud SQL
 const dbSocketPath = process.env.DB_SOCKET_PATH || "/cloudsql";
@@ -225,8 +223,9 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
   }
 });
 
-// GET endpoint for transaction history
-// Reads url params ccy_in, ccy_out, amt_in, amt_out
+/**
+ * GET endpoint for transaction history
+ */
 app.get("/api/history", [isLoggedInMiddleware], async (req: Request, res: Response) => {
   try {
     const uid = req.decodedToken!.uid;
@@ -239,30 +238,53 @@ app.get("/api/history", [isLoggedInMiddleware], async (req: Request, res: Respon
   }
 });
 
-// GET endpoint for history
-// Reads url params date_from and date_to
-app.get("/api/history", (req, res) => {
-  const { date_from, date_to } = req.query;
-  res.send({
-    history: [
-      {
-        date: "2020-01-01",
-        ccy_in: "USD",
-        ccy_out: "BTC",
-        amt_in: "0.00",
-        amt_out: "0.00",
-        price: "0.00",
-      },
-      {
-        date: "2020-01-02",
-        ccy_in: "USD",
-        ccy_out: "BTC",
-        amt_in: "0.00",
-        amt_out: "0.00",
-        price: "0.00",
-      },
-    ],
-  });
+/**
+ * POST request for submitting withdraw requests
+ */
+app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+
+    const { requestType, ccy, amount }: { requestType: string; ccy: string; amount: number } = req.body;
+
+    if (requestType !== "WITHDRAW") {
+      return res.status(401).send("Invalid request type");
+    }
+
+    // in a real app we should have a validator middleware or library to check ccy, amount, etc
+    // hacky -- should use typeguard for enum ideally
+    await upsertRequest(
+      connection,
+      uid,
+      (RequestType as any)[requestType],
+      RequestStatus.PENDING,
+      ccy,
+      new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString(),
+    );
+    res.send("OK");
+  } catch (err: any) {
+    console.error(err);
+    res.status(401).send(err.toString());
+  }
+});
+
+/**
+ * GET request for getting deposit addresses
+ * This in prod should generate a new address for every user, stubbed for now
+ * The ccy should be passed in the query string
+ */
+app.get("/api/deposit", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+    const ccy = req.query.ccy as string;
+    res.send({
+      ccy,
+      address: HOT_WALLET,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
 });
 
 app.listen(PORT, () => {

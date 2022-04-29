@@ -33,3 +33,14 @@ export interface History {
   amt: string;
   price: string;
 }
+
+export enum RequestType {
+  DEPOSIT = "DEPOSIT",
+  WITHDRAW = "WITHDRAW",
+}
+
+export enum RequestStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
