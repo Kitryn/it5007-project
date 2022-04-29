@@ -1,5 +1,12 @@
 import { getAuth } from "firebase/auth"
-import { Price, StakedToken, StakedTokenValue, Wallet, History } from "./data"
+import {
+    Price,
+    StakedToken,
+    StakedTokenValue,
+    Wallet,
+    History,
+    Quote,
+} from "./data"
 
 export async function debug_initialise(): Promise<void> {
     const accessToken = await getAuth().currentUser?.getIdToken(true)
@@ -259,4 +266,43 @@ export async function postRemoveLiquidity(
     })
     console.log(res)
     return true
+}
+
+export async function getQuote(
+    base: string,
+    quote: string,
+    isBuy: boolean,
+    amountBase?: number,
+    amountQuote?: number
+): Promise<Quote | null> {
+    if (amountBase == null && amountQuote == null) {
+        throw new Error(
+            "Exactly one of amountBase or amountQuote must be passed"
+        )
+    }
+    if (amountBase != null && amountQuote != null) {
+        throw new Error("Only one of amountBase or amountQuote can be passed")
+    }
+
+    const accessToken = await getAuth().currentUser?.getIdToken(true)
+    if (accessToken == null) {
+        return null
+    }
+
+    const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+            base,
+            quote,
+            isBuy,
+            ...(amountBase ? { amountBase } : {}),
+            ...(amountQuote ? { amountQuote } : {}),
+        }),
+    })
+    console.log(res)
+    return await res.json()
 }

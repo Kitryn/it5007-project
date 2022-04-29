@@ -66,3 +66,11 @@ export interface History {
     amt: string // amount in base
     price: string
 }
+
+export interface Quote {
+    idealPrice: number
+    actualPrice: number
+    amtCcy1: string
+    amtCcy2: string
+    slippage: number
+}
