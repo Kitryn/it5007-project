@@ -246,6 +246,7 @@ export async function getPrices(
   connection: mysql.Connection,
   ccys: string[],
 ): Promise<{ ccy: string; price: number }[]> {
+  if (ccys == null || ccys.length === 0) return [];
   const prices = await Promise.all(ccys.map((ccy) => getPrice(connection, ccy)));
 
   return prices.map((price, i) => ({ ccy: ccys[i], price }));
@@ -314,10 +315,11 @@ export async function swap(
   uid: string,
   ccy1: string,
   ccy2: string,
-  amount: bigint,
+  amt: string,
   buy: boolean,
 ) {
   try {
+    const amount: bigint = BigInt(amt);
     await connection.promise().beginTransaction();
 
     // Get reserves
@@ -326,11 +328,11 @@ export async function swap(
       SELECT r1.reserve as reserve1, r2.reserve as reserve2 
       FROM pairs p
       JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
-      JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD')
+      JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
       WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
-      AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD');
+      AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?);
     `,
-      [ccy1, ccy2],
+      [ccy1, ccy2, ccy1, ccy2],
     );
 
     const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
@@ -341,10 +343,10 @@ export async function swap(
     let out: bigint;
     if (buy) {
       // get reserve1 out
-      out = getAmountOut(amount, reserve2, reserve1);
+      out = getAmountOut(amount, reserve1, reserve2);
     } else {
       // get reserve2 out
-      out = getAmountOut(amount, reserve1, reserve2);
+      out = getAmountOut(amount, reserve2, reserve1);
     }
 
     // Subtract and add user balances

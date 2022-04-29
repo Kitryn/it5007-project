@@ -16,7 +16,7 @@ import { getCoinBalances, getLpBalances, getLpCoinValues, upsertBalance } from "
 import { CoinBalance, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
-import { addLiquidity, createPair, getPrices } from "./models/pool";
+import { addLiquidity, createPair, getPrices, swap } from "./models/pool";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
@@ -193,18 +193,36 @@ app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Respons
   }
 });
 
-  const totalEarning: number = Array.from(balMap.values()).reduce((acc, curr) => {
-    return acc + parseFloat(curr.earningValue);
-  }, 0);
+/**
+ * Get price of one or more ccys
+ */
+app.post("/api/prices", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const ccys = req.body.ccys;
+    const prices = await getPrices(connection, ccys);
+    res.send(prices);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
 
-  const wallet: Wallet = {
-    fiat: totalFiatValue.toString(),
-    crypto: (totalPortfolioValue - totalFiatValue).toString(),
-    coin_qty: Array.from(balMap.values()),
-    earning: totalEarning.toString(),
-  };
+/**
+ * Perform a swap for a user
+ * Relies on database constraints to throw an error if the user doesn't have enough balance
+ */
+app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+    console.log(req.body);
+    const { ccy1, ccy2, amount, isBuy }: { ccy1: string; ccy2: string; amount: number; isBuy: boolean } = req.body;
 
-  res.send(wallet);
+    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
+    await swap(connection, uid, ccy1, ccy2, amt, isBuy);
+  } catch (err: any) {
+    console.error(err);
+    res.status(401).send(err.toString()); // don't send err message in real app
+  }
 });
 
 // GET endpoint for transaction route
