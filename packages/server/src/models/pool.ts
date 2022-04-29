@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
 import mysql, { RowDataPacket } from "mysql2";
 import { getAmountOut, getRatio } from "../amm";
+import { EXPONENT } from "../constants";
 
 export async function createPair(connection: mysql.Connection, ccy1: string, ccy2: string) {
   const name = `${ccy1}_${ccy2}`;
@@ -353,11 +354,16 @@ export async function swap(
     let _params: string[];
     if (buy) {
       console.log(`${uid} Buying ${amount} ${ccy1}, spending ${out} ${ccy2}`);
-      _params = [ccy1, out.toString(), ccy2, amount.toString(), uid, ccy1, ccy2];
+      _params = [ccy1, amount.toString(), ccy2, out.toString(), uid, ccy1, ccy2];
     } else {
       console.log(`${uid} Selling ${amount} ${ccy1}, getting ${out} ${ccy2}`);
-      _params = [ccy2, amount.toString(), ccy1, out.toString(), uid, ccy1, ccy2];
+      _params = [ccy2, out.toString(), ccy1, amount.toString(), uid, ccy1, ccy2];
     }
+    console.log(
+      `Normalised: ${new BigNumber(amount.toString()).dividedBy(EXPONENT.toString())} ${ccy1}, ${new BigNumber(
+        out.toString(),
+      ).dividedBy(EXPONENT.toString())} ${ccy2}`,
+    );
     await connection.promise().query(
       `
       UPDATE balances 
@@ -371,6 +377,7 @@ export async function swap(
       _params,
     );
 
+    console.log(_params);
     // Subtract and add reserve balances
     await connection.promise().query(
       `

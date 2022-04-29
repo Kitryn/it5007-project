@@ -219,6 +219,7 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
 
     const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
     await swap(connection, uid, ccy1, ccy2, amt, isBuy);
+    res.send("OK");
   } catch (err: any) {
     console.error(err);
     res.status(401).send(err.toString()); // don't send err message in real app
