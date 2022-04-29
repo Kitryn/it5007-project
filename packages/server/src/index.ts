@@ -11,7 +11,14 @@ import mysql from "mysql2";
 
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
-import { getCoinBalances, getLpCoinValues, getTransactionHistory, upsertBalance, upsertRequest } from "./models/wallet";
+import {
+  getCoinBalances,
+  getLpBalances,
+  getLpCoinValues,
+  getTransactionHistory,
+  upsertBalance,
+  upsertRequest,
+} from "./models/wallet";
 import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
@@ -185,6 +192,22 @@ app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Respons
     };
 
     res.send(wallet);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * Get the amount currently staked in which pools
+ */
+app.get("/api/getStaked", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+
+    const staked = await getLpBalances(connection, uid);
+
+    res.send(staked);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
