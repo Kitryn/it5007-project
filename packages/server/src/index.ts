@@ -287,6 +287,35 @@ app.get("/api/deposit", [isLoggedInMiddleware], async (req: Request, res: Respon
   }
 });
 
+/**
+ * POST request for DEPOSITING liquidity
+ * Body needs to include base, quote, amountBase, amountQuote
+ */
+app.post("/api/stake", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+    const {
+      base,
+      quote,
+      amountBase,
+      amountQuote,
+    }: { base: string; quote: string; amountBase: number; amountQuote: number } = req.body;
+
+    // in a real app we need to do proper verification
+    if (amountBase <= 0 || amountQuote <= 0) {
+      return res.status(400).send("Invalid amount");
+    }
+
+    const amtBase = BigInt(new BigNumber(amountBase).multipliedBy(EXPONENT.toString()).toString());
+    const amtQuote = BigInt(new BigNumber(amountQuote).multipliedBy(EXPONENT.toString()).toString());
+
+    await addLiquidity(connection, uid, base, quote, amtBase, amtQuote);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Hello world listening on port ${PORT}`);
 });
