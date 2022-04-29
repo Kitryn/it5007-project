@@ -409,15 +409,15 @@ app.post("/api/stake", [isLoggedInMiddleware], async (req: Request, res: Respons
 app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Response) => {
   try {
     const uid = req.decodedToken!.uid;
-    const { lp, amount }: { lp: string; amount: number } = req.body;
+    const { ccy, amount }: { ccy: string; amount: number } = req.body;
 
-    if (lp == null || amount == null || amount < 0) {
+    if (ccy == null || amount == null || amount < 0) {
       return res.status(400).send("Invalid body");
     }
 
     const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
 
-    await removeLiquidity(connection, uid, lp, BigInt(amt));
+    await removeLiquidity(connection, uid, ccy, BigInt(amt));
 
     res.send("OK");
   } catch (err: any) {
