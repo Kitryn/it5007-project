@@ -141,3 +141,32 @@ export async function getLpCoinValues(
     throw err;
   }
 }
+
+export async function getTransactionHistory(
+  connection: mysql.Connection,
+  uid: string,
+): Promise<
+  {
+    id: string;
+    ccy_id: string;
+    amount: string;
+    created_at: string;
+    updated_at: string;
+  }[]
+> {
+  const [rows] = await connection
+    .promise()
+    .query<
+      RowDataPacket[][] & { id: string; ccy_id: string; amount: string; created_at: string; updated_at: string }[]
+    >(
+      `
+      SELECT id, ccy_id, amount, created_at, updated_at
+      FROM transactions
+      WHERE uid = ?
+      ORDER BY created_at DESC;
+    `,
+      [uid],
+    );
+
+  return rows;
+}
