@@ -12,7 +12,7 @@ import mysql from "mysql2";
 
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
-import { getCoinBalances, getLpBalances, getLpCoinValues, upsertBalance } from "./models/wallet";
+import { getCoinBalances, getLpBalances, getLpCoinValues, getTransactionHistory, upsertBalance } from "./models/wallet";
 import { CoinBalance, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
@@ -214,7 +214,6 @@ app.post("/api/prices", [isLoggedInMiddleware], async (req: Request, res: Respon
 app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response) => {
   try {
     const uid = req.decodedToken!.uid;
-    console.log(req.body);
     const { base, quote, amount, isBuy }: { base: string; quote: string; amount: number; isBuy: boolean } = req.body;
 
     const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
@@ -226,21 +225,18 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
   }
 });
 
-// GET endpoint for transaction route
+// GET endpoint for transaction history
 // Reads url params ccy_in, ccy_out, amt_in, amt_out
-app.get("/api/transaction", (req, res) => {
-  const { ccy_in, ccy_out, amt_in, amt_out } = req.query;
-  res.send({
-    route: {
-      ccy_in,
-      ccy_out,
-      amt_in,
-      amt_out,
-      fee: "0.00",
-      price: "0.00",
-      slippage: "0.00",
-    },
-  });
+app.get("/api/history", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+
+    const history = await getTransactionHistory(connection, uid);
+    res.send(history);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
 });
 
 // GET endpoint for history
