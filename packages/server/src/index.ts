@@ -26,8 +26,9 @@ import {
   addLiquidity,
   calculateLpTokenShare,
   createPair,
+  getBuyQuote,
   getPrices,
-  getQuote,
+  getSellQuote,
   removeLiquidity,
   swap,
 } from "./models/pool";
@@ -435,26 +436,46 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
 });
 
 /**
- * GET request for getting swap quotes
- * URL query params: base, quote, amount, isBuy
+ * GET request for getting buy swap quotes
+ * URL query params: base, quote, isBuy, and exactly one of amountBase, amountQuote
  */
 app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response) => {
   try {
-    let { base, quote, amount, isBuy } = req.query;
+    let { base, quote, amountBase, amountQuote, isBuy } = req.query;
 
-    if (base == null || quote == null || amount == null || isBuy == null) {
+    if (base == null || quote == null || isBuy == null) {
       return res.status(400).send("Missing params");
     }
 
-    if (isBuy !== "true" && isBuy !== "false") {
+    if (isBuy != "true" && isBuy != "false") {
       return res.status(400).send("Invalid isBuy");
     }
-    const isBuyBool = isBuy === "true";
-    const amt = new BigNumber(amount.toString()).multipliedBy(EXPONENT.toString()).toString();
+    const _buy = isBuy === "true";
 
-    const quoteRes = await getQuote(connection, base.toString(), quote.toString(), BigInt(amt), isBuyBool);
+    if (amountBase == null && amountQuote == null) {
+      return res.status(400).send("Missing amount");
+    }
+    if (amountBase != null && amountQuote != null) {
+      return res.status(400).send("Cannot specify both amountBase and amountQuote");
+    }
 
-    res.send(quoteRes);
+    const amountIsInput = amountQuote != null;
+
+    const amount = amountBase || amountQuote;
+    const amt = new BigNumber(amount!.toString()).multipliedBy(EXPONENT.toString()).toString();
+
+    let quoteRes;
+    if (_buy) {
+      quoteRes = await getBuyQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+    } else {
+      quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+    }
+
+    res.send({
+      ...quoteRes,
+      amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
+      amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
+    });
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());

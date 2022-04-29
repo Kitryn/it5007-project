@@ -279,62 +279,110 @@ export async function getPrices(
   return prices.map((price, i) => ({ ccy: ccys[i], price }));
 }
 
-export async function getQuote(
+export async function getBuyQuote(
   connection: mysql.Connection,
   ccy1: string,
   ccy2: string,
   amount: bigint,
-  buy: boolean,
-): Promise<{
-  idealPrice: number;
-  actualPrice: number;
-  slippage: number;
-  idealOutAmount: string;
-  actualOutAmount: string;
-}> {
-  const [rows] = await connection.promise().query<{ reserve1: string; reserve2: string }[] & RowDataPacket[][]>(
-    `
-    SELECT r1.reserve as reserve1, r2.reserve as reserve2 
-    FROM pairs p
-    JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
-    JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD')
-    WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
-    AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD');
-  `,
-    [ccy1, ccy2],
-  );
+  amountIsInput: boolean,
+): Promise<{ idealPrice: number; actualPrice: number; amtCcy1: string; amtCcy2: string; slippage: number }> {
+  try {
+    const amt: bigint = BigInt(amount);
 
-  const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
-  const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
+    // Get reserves
+    const [rows] = await connection.promise().query<{ reserve1: string; reserve2: string }[] & RowDataPacket[][]>(
+      `
+          SELECT r1.reserve as reserve1, r2.reserve as reserve2 
+          FROM pairs p
+          JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?);
+        `,
+      [ccy1, ccy2, ccy1, ccy2],
+    );
 
-  let idealPrice: number = getRatio(reserve1, reserve2);
-  let out: bigint;
-  if (buy) {
-    // get reserve1 out
-    out = getAmountOut(amount, reserve2, reserve1);
-  } else {
-    // get reserve2 out
-    out = getAmountOut(amount, reserve1, reserve2);
+    const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
+    const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
+
+    let other: bigint;
+    if (amountIsInput) {
+      other = getAmountOut(amt, reserve2, reserve1);
+    } else {
+      other = getAmountIn(amt, reserve2, reserve1);
+    }
+
+    const idealPrice = getRatio(reserve1, reserve2);
+    const actualPrice = amountIsInput ? getRatio(other, amt) : getRatio(amt, other);
+    const amtCcy1 = amountIsInput ? other : amt;
+    const amtCcy2 = amountIsInput ? amt : other;
+
+    const slippage = (actualPrice - idealPrice) / idealPrice;
+
+    return {
+      idealPrice,
+      actualPrice,
+      amtCcy1: amtCcy1.toString(),
+      amtCcy2: amtCcy2.toString(),
+      slippage,
+    };
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
+}
 
-  console.log(out);
-  let actualPrice = getRatio(out, amount);
+export async function getSellQuote(
+  connection: mysql.Connection,
+  ccy1: string,
+  ccy2: string,
+  amount: bigint,
+  amountIsInput: boolean,
+): Promise<{ idealPrice: number; actualPrice: number; amtCcy1: string; amtCcy2: string; slippage: number }> {
+  try {
+    const amt: bigint = BigInt(amount);
 
-  const idealOutAmount = new BigNumber(buy ? 1 / idealPrice : idealPrice)
-    .multipliedBy(new BigNumber(amount.toString()))
-    .integerValue();
+    // Get reserves
+    const [rows] = await connection.promise().query<{ reserve1: string; reserve2: string }[] & RowDataPacket[][]>(
+      `
+          SELECT r1.reserve as reserve1, r2.reserve as reserve2 
+          FROM pairs p
+          JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+          AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?);
+        `,
+      [ccy1, ccy2, ccy1, ccy2],
+    );
 
-  const actualOutAmount = new BigNumber(out.toString());
+    const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
+    const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
 
-  const slippage = actualOutAmount.dividedBy(idealOutAmount).toNumber();
+    let other: bigint;
+    if (amountIsInput) {
+      other = getAmountOut(amt, reserve1, reserve2);
+    } else {
+      other = getAmountIn(amt, reserve1, reserve2);
+    }
 
-  return {
-    idealPrice,
-    actualPrice,
-    slippage,
-    idealOutAmount: idealOutAmount.toString(),
-    actualOutAmount: actualOutAmount.toString(),
-  };
+    const idealPrice = getRatio(reserve1, reserve2);
+    const actualPrice = amountIsInput ? getRatio(other, amt) : getRatio(amt, other);
+    const amtCcy1 = amountIsInput ? other : amt;
+    const amtCcy2 = amountIsInput ? amt : other;
+
+    const slippage = (actualPrice - idealPrice) / idealPrice;
+
+    return {
+      idealPrice,
+      actualPrice,
+      amtCcy1: amtCcy1.toString(),
+      amtCcy2: amtCcy2.toString(),
+      slippage,
+    };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 }
 
 export async function _insertTransaction(
