@@ -1,11 +1,4 @@
-export interface OrderFill {
-    name: string
-    amount: string
-    price: string
-    volume: string
-    time: number
-}
-
+// TODO: FIX DOCSTRINGS
 /**
  * Get balances
  * fiat: flat asset value
@@ -18,7 +11,7 @@ export interface Wallet {
     crypto: string
     earning: string
     coin_qty: CoinBalance[]
-} 
+}
 
 /**
  * each coin the user owned is represented as a CoinBalance Object
@@ -30,27 +23,36 @@ export interface Wallet {
 
 export interface CoinBalance {
     name: string
+    symbol: string
+    price: number
     qty: string
     value: string
     earning: string
+    earningValue: string
 }
 
-/**
- * Get route
- * GET request with params `ccy_in` and `ccy_out`
- * Route: list of ccys e.g. [BTC, USD, ETH]
- * If route is length 2, don't display anything.
- * If route is >2, this means we don't have a direct pair between
- * ccy_in and ccy_out so multiple swaps on the back end will be made; display on UI
- */
-export interface Route {
-    ccy_in: string
-    ccy_out: string
-    amt_in: string
-    amt_out: string
-    price: string
-    slippage: string
-    fee: string
+export interface StakedToken {
+    amount: string
+    name: string
+    symbol: string
+    ccy1Name: string
+    ccy1Symbol: string
+    ccy2Name: string
+    ccy2Symbol: string
+}
+
+export interface StakedTokenValue {
+    base: string
+    quote: string
+    baseAmount: string
+    quoteAmount: string
+    baseValue: string
+    quoteValue: string
+}
+
+export interface Price {
+    ccy: string
+    price: number
 }
 
 /**
@@ -59,9 +61,8 @@ export interface Route {
  */
 export interface History {
     date: string
-    ccy_in: string
-    ccy_out: string
-    amount_in: string // amount in ccy_in
-    amount_out: string // amount in ccy_out
-    price: string // abs(amount_in / amount_out)?
+    base: string
+    quote: string
+    amt: string // amount in base
+    price: string
 }

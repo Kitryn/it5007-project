@@ -16,7 +16,7 @@ export default function HistoryPage() {
         (history) =>
             date.subtract(new Date(history.date), fromDate).toDays() >= 0 &&
             date.subtract(toDate, new Date(history.date)).toDays() >= 0 &&
-            (history.ccy_in + history.ccy_out).includes(searchWord)
+            (history.base + history.quote).includes(searchWord)
     )
 
     return (
