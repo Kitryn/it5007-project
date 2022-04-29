@@ -47,12 +47,17 @@ const connection = mysql.createConnection({
 });
 
 /**
+ * Middleware
+ */
+app.use(express.json());
+
+/**
  * Debug endpoints
  */
 app.get("/api/debug/initialise", [isLoggedInMiddleware, isAdminMiddleware], async (req: Request, res: Response) => {
-  const uid = req.decodedToken!.uid;
-
   try {
+    const uid = req.decodedToken!.uid;
+
     await createTables(connection);
     await createCurrencies(connection);
 
@@ -77,9 +82,9 @@ app.get("/api/debug/initialise", [isLoggedInMiddleware, isAdminMiddleware], asyn
 });
 
 app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (req: Request, res: Response) => {
-  const uid = req.decodedToken!.uid;
-
   try {
+    const uid = req.decodedToken!.uid;
+
     await upsertBalance(connection, uid, "BTC", 2n * EXPONENT);
     await upsertBalance(connection, uid, "ETH", 10n * EXPONENT);
     await upsertBalance(connection, uid, "SOL", 10n * EXPONENT);
@@ -99,73 +104,94 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
  * Get the balance of a user
  */
 app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response) => {
-  const uid = req.decodedToken!.uid;
+  try {
+    const uid = req.decodedToken!.uid;
 
-  const coinBalances = await getCoinBalances(connection, uid);
-  const lpValues = await getLpCoinValues(connection, uid);
+    const coinBalances = await getCoinBalances(connection, uid);
+    const lpValues = await getLpCoinValues(connection, uid);
 
-  const balMap: Map<string, CoinBalance> = new Map<string, CoinBalance>();
+    const balMap: Map<string, CoinBalance> = new Map<string, CoinBalance>();
 
-  for (const coinBalance of coinBalances) {
-    const _prev = balMap.get(coinBalance.symbol) ?? {
-      name: coinBalance.name,
-      symbol: coinBalance.symbol,
-      price: 0,
-      qty: "0",
-      value: "0",
-      earning: "0",
-      earningValue: "0",
-    };
+    for (const coinBalance of coinBalances) {
+      const _prev = balMap.get(coinBalance.symbol) ?? {
+        name: coinBalance.name,
+        symbol: coinBalance.symbol,
+        price: 0,
+        qty: "0",
+        value: "0",
+        earning: "0",
+        earningValue: "0",
+      };
 
-    balMap.set(coinBalance.symbol, {
-      ..._prev,
-      qty: (BigInt(_prev.qty) + BigInt(coinBalance.amount)).toString(),
+      balMap.set(coinBalance.symbol, {
+        ..._prev,
+        qty: (BigInt(_prev.qty) + BigInt(coinBalance.amount)).toString(),
+      });
+    }
+
+    for (const lpValue of lpValues) {
+      const _prev = balMap.get(lpValue.symbol) ?? {
+        name: lpValue.name,
+        symbol: lpValue.symbol,
+        price: 0,
+        qty: "0",
+        value: "0",
+        earning: "0",
+        earningValue: "0",
+      };
+
+      balMap.set(lpValue.symbol, {
+        ..._prev,
+        earning: (BigInt(_prev.earning) + BigInt(lpValue.amount)).toString(),
+      });
+    }
+
+    const allSymbols = Array.from(balMap.keys());
+    const symbolPrices: Map<string, number> = (await getPrices(connection, allSymbols)).reduce((acc, curr) => {
+      acc.set(curr.ccy, curr.price);
+      return acc;
+    }, new Map<string, number>());
+
+    allSymbols.forEach((symbol) => {
+      const coinBalance = balMap.get(symbol)!;
+      const price = symbolPrices.get(symbol)!;
+      balMap.set(symbol, {
+        ...coinBalance,
+        price,
+        qty: new BigNumber(coinBalance.qty).dividedBy(EXPONENT.toString()).toString(),
+        earning: new BigNumber(coinBalance.earning).dividedBy(EXPONENT.toString()).toString(),
+        value: new BigNumber(coinBalance.qty).multipliedBy(price).dividedBy(EXPONENT.toString()).toString(),
+        earningValue: new BigNumber(coinBalance.earning).multipliedBy(price).dividedBy(EXPONENT.toString()).toString(),
+      });
     });
-  }
 
-  for (const lpValue of lpValues) {
-    const _prev = balMap.get(lpValue.symbol) ?? {
-      name: lpValue.name,
-      symbol: lpValue.symbol,
-      price: 0,
-      qty: "0",
-      value: "0",
-      earning: "0",
-      earningValue: "0",
-    };
-
-    balMap.set(lpValue.symbol, {
-      ..._prev,
-      earning: (BigInt(_prev.earning) + BigInt(lpValue.amount)).toString(),
-    });
-  }
-
-  const allSymbols = Array.from(balMap.keys());
-  const symbolPrices: Map<string, number> = (await getPrices(connection, allSymbols)).reduce((acc, curr) => {
-    acc.set(curr.ccy, curr.price);
-    return acc;
-  }, new Map<string, number>());
-
-  allSymbols.forEach((symbol) => {
-    const coinBalance = balMap.get(symbol)!;
-    const price = symbolPrices.get(symbol)!;
-    balMap.set(symbol, {
-      ...coinBalance,
-      price,
-      value: new BigNumber(coinBalance.value).multipliedBy(price).dividedBy(EXPONENT.toString()).toString(),
-      earningValue: new BigNumber(coinBalance.earning).multipliedBy(price).dividedBy(EXPONENT.toString()).toString(),
-    });
-  });
-
-  const totalPortfolioValue: number = Array.from(balMap.values()).reduce((acc, curr) => {
-    return acc + parseFloat(curr.value);
-  }, 0);
-
-  const totalFiatValue: number = Array.from(balMap.values())
-    .filter((v) => v.symbol === "SGD")
-    .reduce((acc, curr) => {
+    const totalPortfolioValue: number = Array.from(balMap.values()).reduce((acc, curr) => {
       return acc + parseFloat(curr.value);
     }, 0);
+
+    const totalFiatValue: number = Array.from(balMap.values())
+      .filter((v) => v.symbol === "SGD")
+      .reduce((acc, curr) => {
+        return acc + parseFloat(curr.value);
+      }, 0);
+
+    const totalEarning: number = Array.from(balMap.values()).reduce((acc, curr) => {
+      return acc + parseFloat(curr.earningValue);
+    }, 0);
+
+    const wallet: Wallet = {
+      fiat: totalFiatValue.toString(),
+      crypto: (totalPortfolioValue - totalFiatValue).toString(),
+      coin_qty: Array.from(balMap.values()),
+      earning: totalEarning.toString(),
+    };
+
+    res.send(wallet);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
 
   const totalEarning: number = Array.from(balMap.values()).reduce((acc, curr) => {
     return acc + parseFloat(curr.earningValue);
