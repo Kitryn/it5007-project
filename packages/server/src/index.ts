@@ -399,8 +399,8 @@ app.post("/api/stake", [isLoggedInMiddleware], async (req: Request, res: Respons
       return res.status(400).send("Quote must be SGD");
     }
 
-    const amtBase = BigInt(new BigNumber(amountBase).multipliedBy(EXPONENT.toString()).toString());
-    const amtQuote = BigInt(new BigNumber(amountQuote).multipliedBy(EXPONENT.toString()).toString());
+    const amtBase = BigInt(new BigNumber(amountBase).multipliedBy(EXPONENT.toString()).integerValue().toString());
+    const amtQuote = BigInt(new BigNumber(amountQuote).multipliedBy(EXPONENT.toString()).integerValue().toString());
 
     await addLiquidity(connection, uid, base, quote, amtBase, amtQuote);
     res.send("OK");
@@ -424,7 +424,7 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
       return res.status(400).send("Invalid body");
     }
 
-    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
+    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).integerValue().toString();
 
     await removeLiquidity(connection, uid, ccy, BigInt(amt));
 
@@ -459,10 +459,10 @@ app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response
       return res.status(400).send("Cannot specify both amountBase and amountQuote");
     }
 
-    const amountIsInput = amountQuote != null;
+    const amountIsInput = _buy ? amountQuote != null : amountBase != null;
 
     const amount = amountBase || amountQuote;
-    const amt = new BigNumber(amount!.toString()).multipliedBy(EXPONENT.toString()).toString();
+    const amt = new BigNumber(amount!.toString()).multipliedBy(EXPONENT.toString()).integerValue().toString();
 
     let quoteRes;
     if (_buy) {

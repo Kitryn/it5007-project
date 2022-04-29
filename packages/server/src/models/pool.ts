@@ -359,6 +359,7 @@ export async function getSellQuote(
     const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
 
     let other: bigint;
+    console.log(amountIsInput);
     if (amountIsInput) {
       other = getAmountOut(amt, reserve1, reserve2);
     } else {
@@ -366,9 +367,9 @@ export async function getSellQuote(
     }
 
     const idealPrice = getRatio(reserve1, reserve2);
-    const actualPrice = amountIsInput ? getRatio(other, amt) : getRatio(amt, other);
-    const amtCcy1 = amountIsInput ? other : amt;
-    const amtCcy2 = amountIsInput ? amt : other;
+    const actualPrice = amountIsInput ? getRatio(amt, other) : getRatio(other, amt);
+    const amtCcy1 = amountIsInput ? amt : other;
+    const amtCcy2 = amountIsInput ? other : amt;
 
     const slippage = (actualPrice - idealPrice) / idealPrice;
 
