@@ -108,3 +108,8 @@ $ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:maze
 
 - Stores balances for a given user id `uid`
 - Foreign key constraint `ccy_id` to `currencies.id`
+
+6. **requests**
+
+- Stores withdrawal requests
+- Foreign key constraint `ccy_id` to `currencies.id`
