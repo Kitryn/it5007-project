@@ -309,6 +309,84 @@ export async function getQuote(
   };
 }
 
-export async function swap(connection: mysql.Connection, ccy1: string, ccy2: string, amount: bigint, buy: boolean) {
-  throw new Error("Not implemented");
+export async function swap(
+  connection: mysql.Connection,
+  uid: string,
+  ccy1: string,
+  ccy2: string,
+  amount: bigint,
+  buy: boolean,
+) {
+  try {
+    await connection.promise().beginTransaction();
+
+    // Get reserves
+    const [rows] = await connection.promise().query<{ reserve1: string; reserve2: string }[] & RowDataPacket[][]>(
+      `
+      SELECT r1.reserve as reserve1, r2.reserve as reserve2 
+      FROM pairs p
+      JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+      JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD')
+      WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+      AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = 'SGD');
+    `,
+      [ccy1, ccy2],
+    );
+
+    const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
+    const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
+    console.log(`Pair: ${ccy1}/${ccy2}, reserves: ${reserve1}/${reserve2}`);
+
+    // Get amount out
+    let out: bigint;
+    if (buy) {
+      // get reserve1 out
+      out = getAmountOut(amount, reserve2, reserve1);
+    } else {
+      // get reserve2 out
+      out = getAmountOut(amount, reserve1, reserve2);
+    }
+
+    // Subtract and add user balances
+    let _params: string[];
+    if (buy) {
+      console.log(`${uid} Buying ${amount} ${ccy1}, spending ${out} ${ccy2}`);
+      _params = [ccy1, out.toString(), ccy2, amount.toString(), uid, ccy1, ccy2];
+    } else {
+      console.log(`${uid} Selling ${amount} ${ccy1}, getting ${out} ${ccy2}`);
+      _params = [ccy2, amount.toString(), ccy1, out.toString(), uid, ccy1, ccy2];
+    }
+    await connection.promise().query(
+      `
+      UPDATE balances 
+      SET 
+        amount = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount + ?
+                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount - ?
+                        ELSE amount END),
+        updated_at = NOW()
+      WHERE uid = ? AND ccy_id in ((SELECT c.id FROM currencies c WHERE c.symbol = ?), (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+    `,
+      _params,
+    );
+
+    // Subtract and add reserve balances
+    await connection.promise().query(
+      `
+      UPDATE reserves
+      SET
+        reserve = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve - ?
+                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve + ?
+                        ELSE reserve END),
+        updated_at = NOW()
+      WHERE pair_id = (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+      `,
+      [..._params.slice(0, 4), ccy1, ccy2],
+    );
+
+    await connection.promise().commit();
+  } catch (err: any) {
+    console.error(err);
+    await connection.promise().rollback();
+    throw err;
+  }
 }
