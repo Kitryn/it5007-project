@@ -382,6 +382,14 @@ app.post("/api/stake", [isLoggedInMiddleware], async (req: Request, res: Respons
       return res.status(400).send("Invalid amount");
     }
 
+    if (base === quote) {
+      return res.status(400).send("Base and quote cannot be the same");
+    }
+
+    if (quote !== "SGD") {
+      return res.status(400).send("Quote must be SGD");
+    }
+
     const amtBase = BigInt(new BigNumber(amountBase).multipliedBy(EXPONENT.toString()).toString());
     const amtQuote = BigInt(new BigNumber(amountQuote).multipliedBy(EXPONENT.toString()).toString());
 
