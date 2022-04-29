@@ -42,5 +42,6 @@
   "devDependencies": {
     "bootstrap-icons": "^1.8.1",
     "json-loader": "^0.5.7"
-  }
+  },
+  "proxy": "http://localhost:3000"
 }

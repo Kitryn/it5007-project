@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `transactions` (
+    id SERIAL PRIMARY KEY,
+    uid VARCHAR(255) NOT NULL,
+    pair_id BIGINT UNSIGNED NOT NULL,
+    amount BIGINT NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (pair_id) REFERENCES pairs (id)
+) ENGINE=InnoDB;

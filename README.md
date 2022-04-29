@@ -59,3 +59,52 @@ $ docker build --tag mazesoba .
 $ docker run --init -it --publish 3000:3000 mazesoba
 
 ```
+
+Or for local server development with live code reload on server:
+
+```
+$ docker-compose up --abort-on-container-exit --exit-code-from webapp --build
+```
+
+```
+$ gcloud run deploy sobaapi --source .
+>> https://sobaapi-bovnkkpola-as.a.run.app
+```
+
+Local dev with cloud_sql_proxy
+
+```bash
+$ sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
+
+# For socket usage for local dev server
+$ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql -credential_file=./firebase-admin.json
+```
+
+# Database schema
+
+1. **currencies**
+
+- Stores record of different currencies supported
+- Keeps track if a given currency is a LP token or not by including a reference to pairs.id; null if not LP token
+
+2. **pairs**
+
+- Defines an exchange tradeable pair
+- Foreign key constraint on `ccy1`, `ccy2` to `currencies.id`.
+
+3. **reserves**
+
+- Stores reserves for a given pair+ccy
+- One row for each ccy to make joins easier
+- Foreign key constraint on `pair_id` to `pairs.id`
+- Foreign key constraint on `ccy_id` to `currencies.id`
+
+4. **transactions**
+
+- Stores list of swap transactions made by a user
+- Foreign key constraint on `pair_id` to `pairs.id`
+
+5. **balances**
+
+- Stores balances for a given user id `uid`
+- Foreign key constraint `ccy_id` to `currencies.id`

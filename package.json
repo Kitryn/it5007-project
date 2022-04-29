@@ -15,7 +15,8 @@
     "client:build": "yarn workspace @soba/client build",
     "client:test": "yarn workspace @soba/client test",
     "server:build": "yarn workspace @soba/server build",
-    "server:start": "yarn workspace @soba/server start"
+    "server:start": "yarn workspace @soba/server start",
+    "server:dev": "yarn workspace @soba/server dev"
   },
   "dependencies": {
     "prettier": "^2.5.1"
