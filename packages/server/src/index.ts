@@ -219,7 +219,7 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
     res.send("OK");
   } catch (err: any) {
     console.error(err);
-    res.status(401).send(err.toString()); // don't send err message in real app
+    res.status(400).send(err.toString()); // don't send err message in real app
   }
 });
 
@@ -245,18 +245,13 @@ app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Resp
   try {
     const uid = req.decodedToken!.uid;
 
-    const { requestType, ccy, amount }: { requestType: string; ccy: string; amount: number } = req.body;
-
-    if (requestType !== "WITHDRAW") {
-      return res.status(401).send("Invalid request type");
-    }
+    const { ccy, amount }: { ccy: string; amount: number } = req.body;
 
     // in a real app we should have a validator middleware or library to check ccy, amount, etc
-    // hacky -- should use typeguard for enum ideally
     await upsertRequest(
       connection,
       uid,
-      (RequestType as any)[requestType],
+      RequestType.WITHDRAW,
       RequestStatus.PENDING,
       ccy,
       new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString(),
@@ -264,7 +259,7 @@ app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Resp
     res.send("OK");
   } catch (err: any) {
     console.error(err);
-    res.status(401).send(err.toString());
+    res.status(400).send(err.toString());
   }
 });
 
@@ -276,7 +271,12 @@ app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Resp
 app.get("/api/deposit", [isLoggedInMiddleware], async (req: Request, res: Response) => {
   try {
     const uid = req.decodedToken!.uid;
-    const ccy = req.query.ccy as string;
+    const ccy = req.query.ccy;
+
+    if (ccy == null) {
+      return res.status(400).send("Missing ccy");
+    }
+
     res.send({
       ccy,
       address: HOT_WALLET,
