@@ -215,10 +215,10 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
   try {
     const uid = req.decodedToken!.uid;
     console.log(req.body);
-    const { ccy1, ccy2, amount, isBuy }: { ccy1: string; ccy2: string; amount: number; isBuy: boolean } = req.body;
+    const { base, quote, amount, isBuy }: { base: string; quote: string; amount: number; isBuy: boolean } = req.body;
 
     const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
-    await swap(connection, uid, ccy1, ccy2, amt, isBuy);
+    await swap(connection, uid, base, quote, amt, isBuy);
     res.send("OK");
   } catch (err: any) {
     console.error(err);
