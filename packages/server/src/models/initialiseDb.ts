@@ -3,6 +3,7 @@ import {
   SQL_CREATE_TABLE_BALANCES,
   SQL_CREATE_TABLE_CURRENCIES,
   SQL_CREATE_TABLE_PAIRS,
+  SQL_CREATE_TABLE_REQUESTS,
   SQL_CREATE_TABLE_RESERVES,
   SQL_CREATE_TABLE_TRANSACTIONS,
 } from "./schema";
@@ -19,6 +20,7 @@ export async function createTables(connection: mysql.Connection) {
   }
   await connection.promise().execute(SQL_CREATE_TABLE_RESERVES);
   await connection.promise().execute(SQL_CREATE_TABLE_TRANSACTIONS);
+  await connection.promise().execute(SQL_CREATE_TABLE_REQUESTS);
 }
 
 export async function createCurrencies(connection: mysql.Connection) {

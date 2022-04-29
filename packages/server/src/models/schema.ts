@@ -10,3 +10,4 @@ export const SQL_CREATE_TABLE_TRANSACTIONS = fs
   .readFileSync(path.join(__dirname, `./sql/transactions.sql`), "utf8")
   .toString();
 export const SQL_CREATE_TABLE_RESERVES = fs.readFileSync(path.join(__dirname, `./sql/reserves.sql`), "utf8").toString();
+export const SQL_CREATE_TABLE_REQUESTS = fs.readFileSync(path.join(__dirname, `./sql/requests.sql`), "utf8").toString();

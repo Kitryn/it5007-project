@@ -1,4 +1,5 @@
 import mysql, { RowDataPacket } from "mysql2";
+import { History, RequestStatus, RequestType } from "../types";
 import { calculateLpTokenShare, getPrice } from "./pool";
 
 export async function upsertBalance(connection: mysql.Connection, uid: string, ccy: string, amount: bigint) {
@@ -140,4 +141,39 @@ export async function getLpCoinValues(
     await connection.promise().rollback();
     throw err;
   }
+}
+
+export async function getTransactionHistory(connection: mysql.Connection, uid: string): Promise<History[]> {
+  const [rows] = await connection.promise().query<RowDataPacket[][] & History[]>(
+    `
+      SELECT t.updated_at as date, c1.symbol as base, c2.symbol as quote, t.amount as amt, t.price as price
+      FROM transactions t
+      JOIN pairs p ON t.pair_id = p.id
+      JOIN currencies c1 ON p.ccy1_id = c1.id
+      JOIN currencies c2 ON p.ccy2_id = c2.id
+      WHERE t.uid = ?
+      ORDER BY t.updated_at DESC LIMIT 100;
+    `,
+    [uid],
+  );
+
+  return rows;
+}
+
+export async function upsertRequest(
+  connection: mysql.Connection,
+  uid: string,
+  requestType: RequestType,
+  requestStatus: RequestStatus,
+  ccy: string,
+  amount: string,
+) {
+  await connection.promise().execute(
+    `
+    INSERT INTO requests (uid, request_type, request_status, ccy_id, amount)
+    VALUES (?, ?, ?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?)
+    ON DUPLICATE KEY UPDATE request_status = ?, updated_at = NOW();
+  `,
+    [uid, requestType, requestStatus, ccy, amount, requestStatus],
+  );
 }

@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
 import mysql, { RowDataPacket } from "mysql2";
-import { getAmountOut, getRatio } from "../amm";
+import { getAmountIn, getAmountOut, getRatio } from "../amm";
+import { EXPONENT } from "../constants";
 
 export async function createPair(connection: mysql.Connection, ccy1: string, ccy2: string) {
   const name = `${ccy1}_${ccy2}`;
@@ -147,6 +148,10 @@ export async function calculateLpTokenShare(
 ): Promise<{ ccy1: string; ccy2: string; reserve1: number | string; reserve2: number | string }> {
   const [_, ccy1, ccy2] = lpSymbol.split("_");
 
+  if (amount == 0n) {
+    return { ccy1, ccy2, reserve1: 0, reserve2: 0 };
+  }
+
   const [rows] = await connection
     .promise()
     .query<RowDataPacket[][] & { ccy1: string; ccy2: string; reserve1: number | string; reserve2: number | string }[]>(
@@ -174,10 +179,26 @@ export async function calculateLpTokenShare(
 }
 
 export async function removeLiquidity(connection: mysql.Connection, uid: string, lpSymbol: string, amount: bigint) {
-  const [_, ccy1, ccy2] = lpSymbol.split("_");
-
   try {
+    const [_, ccy1, ccy2] = lpSymbol.split("_");
     await connection.promise().beginTransaction();
+
+    if (amount == 0n) {
+      // If 0, we burn all of the user's liquidity tokens
+      const [_userLp] = await connection.promise().query<RowDataPacket[][] & { amount: string | number }[]>(
+        `
+        SELECT b.amount
+        FROM balances b
+        WHERE b.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND b.uid = ?;
+        `,
+        [lpSymbol, uid],
+      );
+
+      if (_userLp == null || _userLp.length == 0) {
+        throw new Error("User has no liquidity tokens");
+      }
+      amount = BigInt(_userLp[0].amount);
+    }
 
     // Calculate share of liquidity pool
     const { reserve1, reserve2 } = await calculateLpTokenShare(connection, lpSymbol, amount);
@@ -209,7 +230,7 @@ export async function removeLiquidity(connection: mysql.Connection, uid: string,
       INSERT INTO balances (uid, ccy_id, amount)
       VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?),
               (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?) AS new
-      ON DUPLICATE KEY UPDATE amount = amount + new.amount, updated_at = NOW();
+      ON DUPLICATE KEY UPDATE balances.amount = balances.amount + new.amount, updated_at = NOW();
     `,
       [uid, ccy1, reserve1, uid, ccy2, reserve2],
     );
@@ -239,6 +260,12 @@ export async function getPrice(connection: mysql.Connection, ccy1: string): Prom
     [ccy1, ccy1],
   );
 
+  const { reserve1, reserve2 } = rows[0];
+  if (BigInt(reserve1) == 0n || BigInt(reserve2) == 0n) {
+    console.warn(`No liquidity for ${ccy1}`);
+    return 0;
+  }
+
   return getRatio(BigInt(rows[0].reserve1), BigInt(rows[0].reserve2));
 }
 
@@ -246,6 +273,7 @@ export async function getPrices(
   connection: mysql.Connection,
   ccys: string[],
 ): Promise<{ ccy: string; price: number }[]> {
+  if (ccys == null || ccys.length === 0) return [];
   const prices = await Promise.all(ccys.map((ccy) => getPrice(connection, ccy)));
 
   return prices.map((price, i) => ({ ccy: ccys[i], price }));
@@ -309,6 +337,118 @@ export async function getQuote(
   };
 }
 
-export async function swap(connection: mysql.Connection, ccy1: string, ccy2: string, amount: bigint, buy: boolean) {
-  throw new Error("Not implemented");
+export async function _insertTransaction(
+  connection: mysql.Connection,
+  uid: string,
+  ccy1: string,
+  ccy2: string,
+  amt: string,
+  price: string,
+  buy: boolean,
+) {
+  const amount: string = new BigNumber(amt).multipliedBy(buy ? 1 : -1).toString();
+  await connection.promise().execute(
+    `
+    INSERT INTO transactions (uid, pair_id, amount, price)
+    VALUES 
+    (
+      ?, 
+      (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)), 
+      ?,
+      ?
+    )
+  `,
+    [uid, ccy1, ccy2, amount, price],
+  );
+}
+
+export async function swap(
+  connection: mysql.Connection,
+  uid: string,
+  ccy1: string,
+  ccy2: string,
+  amt: string,
+  buy: boolean,
+) {
+  try {
+    const amount: bigint = BigInt(amt);
+    await connection.promise().beginTransaction();
+
+    // Get reserves
+    const [rows] = await connection.promise().query<{ reserve1: string; reserve2: string }[] & RowDataPacket[][]>(
+      `
+      SELECT r1.reserve as reserve1, r2.reserve as reserve2 
+      FROM pairs p
+      JOIN reserves r1 ON p.id = r1.pair_id AND r1.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+      JOIN reserves r2 ON p.id = r2.pair_id AND r2.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+      WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)
+      AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?);
+    `,
+      [ccy1, ccy2, ccy1, ccy2],
+    );
+
+    const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
+    const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
+    console.log(`Pair: ${ccy1}/${ccy2}, reserves: ${reserve1}/${reserve2}`);
+
+    // Get amount out
+    let out: bigint;
+    if (buy) {
+      // get reserve1 out
+      out = getAmountIn(amount, reserve2, reserve1);
+    } else {
+      out = getAmountOut(amount, reserve1, reserve2);
+    }
+
+    // Subtract and add user balances
+    let _params: string[];
+    if (buy) {
+      console.log(`${uid} Buying ${amount} ${ccy1}, spending ${out} ${ccy2}`);
+      _params = [ccy1, amount.toString(), ccy2, out.toString(), uid, ccy1, ccy2];
+    } else {
+      console.log(`${uid} Selling ${amount} ${ccy1}, getting ${out} ${ccy2}`);
+      _params = [ccy2, out.toString(), ccy1, amount.toString(), uid, ccy1, ccy2];
+    }
+    console.log(
+      `Normalised: ${new BigNumber(amount.toString()).dividedBy(EXPONENT.toString())} ${ccy1}, ${new BigNumber(
+        out.toString(),
+      ).dividedBy(EXPONENT.toString())} ${ccy2}`,
+    );
+    await connection.promise().query(
+      `
+      UPDATE balances 
+      SET 
+        amount = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount + ?
+                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount - ?
+                        ELSE amount END),
+        updated_at = NOW()
+      WHERE uid = ? AND ccy_id in ((SELECT c.id FROM currencies c WHERE c.symbol = ?), (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+    `,
+      _params,
+    );
+
+    // Subtract and add reserve balances
+    await connection.promise().query(
+      `
+      UPDATE reserves
+      SET
+        reserve = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve - ?
+                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve + ?
+                        ELSE reserve END),
+        updated_at = NOW()
+      WHERE pair_id = (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+      `,
+      [..._params.slice(0, 4), ccy1, ccy2],
+    );
+
+    // Finally add a transaction
+    const price = new BigNumber(out.toString()).dividedBy(amount.toString()).toString();
+    await _insertTransaction(connection, uid, ccy1, ccy2, amt, price, buy);
+
+    await connection.promise().commit();
+  } catch (err: any) {
+    console.error(err);
+    await connection.promise().rollback();
+    throw err;
+  }
 }
