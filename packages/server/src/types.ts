@@ -28,9 +28,8 @@ export interface Route {
 
 export interface History {
   date: string;
-  ccy_in: string;
-  ccy_out: string;
-  amt_in: string;
-  amt_out: string;
+  base: string;
+  quote: string;
+  amt: string;
   price: string;
 }

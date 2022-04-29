@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import mysql, { RowDataPacket } from "mysql2";
-import { getAmountOut, getRatio } from "../amm";
+import { getAmountIn, getAmountOut, getRatio } from "../amm";
 import { EXPONENT } from "../constants";
 
 export async function createPair(connection: mysql.Connection, ccy1: string, ccy2: string) {
@@ -317,20 +317,22 @@ export async function _insertTransaction(
   ccy1: string,
   ccy2: string,
   amt: string,
+  price: string,
   buy: boolean,
 ) {
   const amount: string = new BigNumber(amt).multipliedBy(buy ? 1 : -1).toString();
   await connection.promise().execute(
     `
-    INSERT INTO transactions (uid, pair_id, amount)
+    INSERT INTO transactions (uid, pair_id, amount, price)
     VALUES 
     (
       ?, 
       (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)), 
+      ?,
       ?
     )
   `,
-    [uid, ccy1, ccy2, amount],
+    [uid, ccy1, ccy2, amount, price],
   );
 }
 
@@ -367,10 +369,9 @@ export async function swap(
     let out: bigint;
     if (buy) {
       // get reserve1 out
-      out = getAmountOut(amount, reserve1, reserve2);
+      out = getAmountIn(amount, reserve2, reserve1);
     } else {
-      // get reserve2 out
-      out = getAmountOut(amount, reserve2, reserve1);
+      out = getAmountOut(amount, reserve1, reserve2);
     }
 
     // Subtract and add user balances
@@ -415,7 +416,8 @@ export async function swap(
     );
 
     // Finally add a transaction
-    await _insertTransaction(connection, uid, ccy1, ccy2, amt, buy);
+    const price = new BigNumber(out.toString()).dividedBy(amount.toString()).toString();
+    await _insertTransaction(connection, uid, ccy1, ccy2, amt, price, buy);
 
     await connection.promise().commit();
   } catch (err: any) {
