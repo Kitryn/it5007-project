@@ -148,6 +148,10 @@ export async function calculateLpTokenShare(
 ): Promise<{ ccy1: string; ccy2: string; reserve1: number | string; reserve2: number | string }> {
   const [_, ccy1, ccy2] = lpSymbol.split("_");
 
+  if (amount == 0n) {
+    return { ccy1, ccy2, reserve1: 0, reserve2: 0 };
+  }
+
   const [rows] = await connection
     .promise()
     .query<RowDataPacket[][] & { ccy1: string; ccy2: string; reserve1: number | string; reserve2: number | string }[]>(
@@ -175,10 +179,26 @@ export async function calculateLpTokenShare(
 }
 
 export async function removeLiquidity(connection: mysql.Connection, uid: string, lpSymbol: string, amount: bigint) {
-  const [_, ccy1, ccy2] = lpSymbol.split("_");
-
   try {
+    const [_, ccy1, ccy2] = lpSymbol.split("_");
     await connection.promise().beginTransaction();
+
+    if (amount == 0n) {
+      // If 0, we burn all of the user's liquidity tokens
+      const [_userLp] = await connection.promise().query<RowDataPacket[][] & { amount: string | number }[]>(
+        `
+        SELECT b.amount
+        FROM balances b
+        WHERE b.ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND b.uid = ?;
+        `,
+        [lpSymbol, uid],
+      );
+
+      if (_userLp == null || _userLp.length == 0) {
+        throw new Error("User has no liquidity tokens");
+      }
+      amount = BigInt(_userLp[0].amount);
+    }
 
     // Calculate share of liquidity pool
     const { reserve1, reserve2 } = await calculateLpTokenShare(connection, lpSymbol, amount);
@@ -210,7 +230,7 @@ export async function removeLiquidity(connection: mysql.Connection, uid: string,
       INSERT INTO balances (uid, ccy_id, amount)
       VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?),
               (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?) AS new
-      ON DUPLICATE KEY UPDATE amount = amount + new.amount, updated_at = NOW();
+      ON DUPLICATE KEY UPDATE balances.amount = balances.amount + new.amount, updated_at = NOW();
     `,
       [uid, ccy1, reserve1, uid, ccy2, reserve2],
     );
@@ -239,6 +259,12 @@ export async function getPrice(connection: mysql.Connection, ccy1: string): Prom
   `,
     [ccy1, ccy1],
   );
+
+  const { reserve1, reserve2 } = rows[0];
+  if (BigInt(reserve1) == 0n || BigInt(reserve2) == 0n) {
+    console.warn(`No liquidity for ${ccy1}`);
+    return 0;
+  }
 
   return getRatio(BigInt(rows[0].reserve1), BigInt(rows[0].reserve2));
 }

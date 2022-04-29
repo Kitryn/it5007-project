@@ -22,7 +22,7 @@ import {
 import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
-import { addLiquidity, calculateLpTokenShare, createPair, getPrices, swap } from "./models/pool";
+import { addLiquidity, calculateLpTokenShare, createPair, getPrices, removeLiquidity, swap } from "./models/pool";
 
 const PORT = process.env.PORT ?? 3000;
 const app = express();
@@ -385,6 +385,32 @@ app.post("/api/stake", [isLoggedInMiddleware], async (req: Request, res: Respons
     const amtQuote = BigInt(new BigNumber(amountQuote).multipliedBy(EXPONENT.toString()).toString());
 
     await addLiquidity(connection, uid, base, quote, amtBase, amtQuote);
+    res.send("OK");
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * POST request for REMOVING liquidity
+ * Body needs to include LP symbol (LP_BTC_SGD), and amount of LP tokens to burn
+ * Pass amount: 0 to remove all liquidity
+ */
+app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+  try {
+    const uid = req.decodedToken!.uid;
+    const { lp, amount }: { lp: string; amount: number } = req.body;
+
+    if (lp == null || amount == null || amount < 0) {
+      return res.status(400).send("Invalid body");
+    }
+
+    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
+
+    await removeLiquidity(connection, uid, lp, BigInt(amt));
+
+    res.send("OK");
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
