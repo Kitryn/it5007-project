@@ -311,6 +311,29 @@ export async function getQuote(
   };
 }
 
+export async function _insertTransaction(
+  connection: mysql.Connection,
+  uid: string,
+  ccy1: string,
+  ccy2: string,
+  amt: string,
+  buy: boolean,
+) {
+  const amount: string = new BigNumber(amt).multipliedBy(buy ? 1 : -1).toString();
+  await connection.promise().execute(
+    `
+    INSERT INTO transactions (uid, pair_id, amount)
+    VALUES 
+    (
+      ?, 
+      (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?)), 
+      ?
+    )
+  `,
+    [uid, ccy1, ccy2, amount],
+  );
+}
+
 export async function swap(
   connection: mysql.Connection,
   uid: string,
@@ -377,7 +400,6 @@ export async function swap(
       _params,
     );
 
-    console.log(_params);
     // Subtract and add reserve balances
     await connection.promise().query(
       `
@@ -391,6 +413,9 @@ export async function swap(
       `,
       [..._params.slice(0, 4), ccy1, ccy2],
     );
+
+    // Finally add a transaction
+    await _insertTransaction(connection, uid, ccy1, ccy2, amt, buy);
 
     await connection.promise().commit();
   } catch (err: any) {
