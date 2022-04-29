@@ -305,3 +305,20 @@ export async function getQuote(
     console.log(res)
     return await res.json()
 }
+
+export async function getPairs(): Promise<
+    { base: string; quote: string }[] | null
+> {
+    const accessToken = await getAuth().currentUser?.getIdToken(true)
+    if (accessToken == null) {
+        return null
+    }
+
+    const res = await fetch("/api/pairs", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    })
+    console.log(res)
+    return await res.json()
+}

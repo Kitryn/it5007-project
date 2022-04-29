@@ -29,6 +29,7 @@ import {
   getBuyQuote,
   getPrices,
   getSellQuote,
+  listPairs,
   removeLiquidity,
   swap,
 } from "./models/pool";
@@ -476,6 +477,19 @@ app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response
       amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
       amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
     });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send(err.toString());
+  }
+});
+
+/**
+ * List pairs on exchange
+ */
+app.get("/api/pairs", async (req: Request, res: Response) => {
+  try {
+    const pairs = await listPairs(connection);
+    res.send(pairs);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());

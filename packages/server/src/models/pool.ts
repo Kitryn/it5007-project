@@ -501,3 +501,16 @@ export async function swap(
     throw err;
   }
 }
+
+export async function listPairs(connection: mysql.Connection) {
+  const [rows] = await connection.promise().query<{ base: string; quote: string }[] & RowDataPacket[][]>(
+    `
+    SELECT ccy1.symbol as base, ccy2.symbol as quote
+    FROM pairs p
+    JOIN currencies ccy1 ON p.ccy1_id = ccy1.id
+    JOIN currencies ccy2 ON p.ccy2_id = ccy2.id
+    ORDER BY ccy1.symbol ASC;
+  `,
+  );
+  return rows;
+}
