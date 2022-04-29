@@ -27,6 +27,7 @@ import { addLiquidity, calculateLpTokenShare, createPair, getPrices, removeLiqui
 const PORT = process.env.PORT ?? 3000;
 const app = express();
 const HOT_WALLET = "0x0d7b26Bfa1D36e648513a80c8D6172583E7a2c5E";
+const EXCHANGE_ONLY_UID = "exchange-only";
 
 if (process.env.NODE_ENV !== "production") {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
@@ -75,9 +76,9 @@ app.get("/api/debug/initialise", [isLoggedInMiddleware, isAdminMiddleware], asyn
     await createPair(connection, "ETH", "SGD");
     await createPair(connection, "SOL", "SGD");
 
-    await addLiquidity(connection, uid, "BTC", "SGD", 1n * EXPONENT, 100000n * EXPONENT);
-    await addLiquidity(connection, uid, "ETH", "SGD", 2n * EXPONENT, 1000n * EXPONENT);
-    await addLiquidity(connection, uid, "SOL", "SGD", 3n * EXPONENT, 1000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "BTC", "SGD", 1000n * EXPONENT, 53018000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "ETH", "SGD", 10000n * EXPONENT, 38647600n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "SOL", "SGD", 270270n * EXPONENT, 35000000n * EXPONENT);
 
     res.send("OK");
   } catch (err: any) {
