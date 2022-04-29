@@ -26,3 +26,7 @@ yarn-error.log*
 
 # firebase
 .firebase/
+firebase-admin.json
+
+# dev
+.env

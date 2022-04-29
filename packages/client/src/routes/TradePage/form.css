@@ -1,0 +1,12 @@
+.selection {
+    font-size: 3rem;
+    font-weight: bold;
+    outline: none;
+    box-shadow: none;
+}
+
+.swap-form input:focus {
+    outline: none;
+    box-shadow: none;
+    font-size: 3em;
+}

@@ -1,9 +1,13 @@
 import BaseForm from "./BaseForm"
 import "./tab.css"
 import React, { useState } from "react"
-
+import { useParams } from "react-router-dom"
 export default function CashPage() {
-    const [isDeposit, setIsDeposit] = useState(true)
+    const { tab } = useParams()
+
+    const [isDeposit, setIsDeposit] = useState(
+        tab === "deposit" || tab === undefined
+    )
 
     function onClickHandler(isDeposit: boolean) {
         setIsDeposit(isDeposit)

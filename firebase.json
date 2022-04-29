@@ -1,12 +1,15 @@
 {
   "hosting": {
     "public": "./packages/client/build",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "sobaapi",
+          "region": "asia-southeast1"
+        }
+      },
       {
         "source": "**",
         "destination": "/index.html"

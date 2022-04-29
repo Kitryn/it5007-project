@@ -1,24 +1,42 @@
+import { Link } from "react-router-dom"
 import AssetTable from "./AssetsTable"
 import walletData from "./WalletData.json"
+import { WALLET } from "./DummyWallet"
+import { useEffect, useState } from "react"
+import { Wallet } from "../../data"
 
 export default function WalletPage() {
-    const flatAssets = parseFloat(walletData.flatAssets.SGD)
-    const cryptoAssetPaid = walletData.cryptoAssets.reduce(
-        (prev, curr) =>
-            prev +
-            parseFloat(curr.quantityOwned) * parseFloat(curr.purchasedPrice),
-        0.0
-    )
-    const cryptoAssetOwned = walletData.cryptoAssets.reduce(
-        (prev, curr) =>
-            prev +
-            parseFloat(curr.quantityOwned) * parseFloat(curr.currentPrice),
-        0.0
-    )
+    const [wallet, setWallet] = useState<Wallet>({
+        fiat: "0",
+        crypto: "0",
+        earning: "0",
+        coin_qty: [],
+    })
 
-    const cryptoEarning = cryptoAssetPaid - cryptoAssetOwned
-    const totalAsset = flatAssets + cryptoEarning
-    const cryptoAssets = walletData.cryptoAssets
+    // load wallet
+    useEffect(() => {
+        setTimeout(() => {
+            setWallet(WALLET)
+        }, 500)
+    }, [])
+
+    const { fiat, crypto, earning, coin_qty } = wallet
+
+    const flatAssets = parseFloat(fiat)
+    const cryptoAssets = parseFloat(crypto)
+    const earnings = parseFloat(earning)
+    const coins = coin_qty
+
+    const totalAsset = flatAssets + cryptoAssets
+
+    function onSearchSubmitHandler(searchTerm: string) {
+        setWallet({
+            ...WALLET,
+            coin_qty: WALLET.coin_qty.filter((x) =>
+                x.name.toLowerCase().includes(searchTerm)
+            ),
+        })
+    }
 
     return (
         <div className="container">
@@ -60,20 +78,22 @@ export default function WalletPage() {
                             </div>
                             <div className="row row-cols-5 g-1 ">
                                 <div className="col">
-                                    <a
-                                        href="#"
+                                    <Link
+                                        type={"a"}
+                                        to="/cash/deposit"
                                         className="text-decoration-none text-muted"
                                     >
                                         Deposit
-                                    </a>
+                                    </Link>
                                 </div>
                                 <div className="col">
-                                    <a
-                                        href="#"
+                                    <Link
+                                        type={"a"}
+                                        to="/cash/withdraw"
                                         className="text-decoration-none text-muted"
                                     >
                                         Withdraw
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -86,33 +106,36 @@ export default function WalletPage() {
                                 </div>
                                 <div className="row">
                                     <span className="fs-3 fw-bold">
-                                        {cryptoAssetOwned.toFixed(2)} SGD
+                                        {cryptoAssets.toFixed(2)} SGD
                                     </span>
                                 </div>
                                 <div className="row row-cols-6 g-1 ">
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/buy"
                                             className="text-decoration-none text-muted"
                                         >
                                             Buy
-                                        </a>
+                                        </Link>
                                     </div>
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/sell"
                                             className="text-decoration-none text-muted"
                                         >
                                             Sell
-                                        </a>
+                                        </Link>
                                     </div>
                                     <div className="col">
-                                        <a
-                                            href="#"
+                                        <Link
+                                            type={"a"}
+                                            to="/trade/swap"
                                             className="text-decoration-none text-muted"
                                         >
                                             Swap
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -129,12 +152,12 @@ export default function WalletPage() {
                                         <span
                                             className={
                                                 "fs-3 fw-bold " +
-                                                (cryptoEarning < 0
+                                                (earnings < 0
                                                     ? "text-danger"
                                                     : "text-success")
                                             }
                                         >
-                                            {cryptoEarning < 0 ? (
+                                            {earnings < 0 ? (
                                                 <i
                                                     className={
                                                         "bi bi-caret-down-fill pe-2"
@@ -151,17 +174,18 @@ export default function WalletPage() {
                                                     aria-label="Up"
                                                 />
                                             )}
-                                            {cryptoEarning.toFixed(2)} SGD
+                                            {earnings.toFixed(2)} SGD
                                         </span>
                                     </div>
                                     <div className="row">
                                         <div className="col">
-                                            <a
-                                                href="#"
+                                            <Link
+                                                type={"a"}
+                                                to="/history"
                                                 className="text-decoration-none text-muted"
                                             >
-                                                View Portfolio
-                                            </a>
+                                                View History
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
@@ -171,7 +195,10 @@ export default function WalletPage() {
                 </div>
                 <div className="col-7">
                     <div className="card h-100">
-                        <AssetTable cryptoAssets={cryptoAssets} />
+                        <AssetTable
+                            cryptoAssets={coins}
+                            onSearchSubmitHandler={onSearchSubmitHandler}
+                        />
                     </div>
                 </div>
             </div>

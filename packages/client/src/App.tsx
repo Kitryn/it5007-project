@@ -9,6 +9,7 @@ import HistoryPage from "./routes/HistoryPage"
 import LoginPage from "./routes/LoginPage"
 import TradePage from "./routes/TradePage"
 import WalletPage from "./routes/WalletPage"
+import LiquidityPage from "./routes/LiquidityPage"
 
 function App() {
     const [user, setUser] = useState<User | null>(null)
@@ -53,7 +54,34 @@ function App() {
                     }
                 />
                 <Route
+                    path="/trade/:operation"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <TradePage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
+                    path="/liquidity"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <LiquidityPage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
                     path="/cash"
+                    element={
+                        <RequireAuth>
+                            <Navbar />
+                            <CashPage />
+                        </RequireAuth>
+                    }
+                />
+                <Route
+                    path="/cash/:tab"
                     element={
                         <RequireAuth>
                             <Navbar />

@@ -1,5 +1,6 @@
 import "./form.css"
 import React, { useRef } from "react"
+import PushableButton from "../../components/UI/PushableButton"
 
 interface BaseFormProps {
     isDeposit: boolean
@@ -39,7 +40,9 @@ export default class BaseForm extends React.Component<
             : "Withdraw money from your account"
         const subscript = isDeposit
             ? "*Please keep sufficient funds in your bank account to avoid rejection or overdraft"
-            : "*Cash withdrawn may process upto 7 working days"
+            : "*Cash withdrawn may process up to 7 working days"
+
+        // Missing maximum withdraw limit check
         return (
             <form name="depositForm" autoComplete="off">
                 <div className="cash-display bg-primary ">
@@ -65,6 +68,7 @@ export default class BaseForm extends React.Component<
                                         width: "9em",
                                         fontSize: "4em",
                                     }}
+                                    placeholder="0.00"
                                     maxLength={9}
                                     autoFocus
                                 />
@@ -84,12 +88,7 @@ export default class BaseForm extends React.Component<
                 </div>
                 <div className="row p-5">
                     <div className="d-grid gap-2 col-6 mx-auto ">
-                        <button
-                            type="submit"
-                            className="btn btn-outline-primary pushable "
-                        >
-                            <span className="front">{formLabel}</span>
-                        </button>
+                        <PushableButton>{formLabel}</PushableButton>
                     </div>
                 </div>
             </form>

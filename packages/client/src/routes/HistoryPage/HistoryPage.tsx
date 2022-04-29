@@ -2,44 +2,59 @@ import HistoryRow from "./HistoryRow"
 import DatePicker from "../../components/DatePicker"
 import SearchBar from "../../components/SearchBar"
 import "./HistoryPage.css"
-import React from "react"
-
+import React, { useState } from "react"
+import date from "date-and-time"
 import { PLACEHOLDER_HISTORY } from "./fixture"
 
 export default function HistoryPage() {
-    let asd: React.RefObject<HTMLInputElement> = React.createRef()
+    const today = new Date()
+    const [fromDate, setFromDate] = useState(date.addMonths(today, -3))
+    const [toDate, setToDate] = useState(today)
+    const [searchWord, setSearchWord] = useState("")
+
+    const filteredHistory = PLACEHOLDER_HISTORY.filter(
+        (history) =>
+            date.subtract(new Date(history.date), fromDate).toDays() >= 0 &&
+            date.subtract(toDate, new Date(history.date)).toDays() >= 0 &&
+            (history.ccy_in + history.ccy_out).includes(searchWord)
+    )
 
     return (
         <div className="container d-flex flex-column">
             <div className="row header">
                 <div className="col-9 bg-white px-5 py-2 m-2 flex-grow-1 border rounded-pill d-flex justify-content-between align-items-center">
-                    <DatePicker />
-                    <div className="col-2 text-center fw-bold">to</div>
-                    <DatePicker />
+                    <DatePicker
+                        defaultDate={fromDate}
+                        setNewDate={setFromDate}
+                    />
+                    <div className="col-2 text-center fw-bold text-muted">
+                        to
+                    </div>
+                    <DatePicker defaultDate={toDate} setNewDate={setToDate} />
                 </div>
                 <div className="col-2 bg-white px-4 py-2 m-2 border rounded-pill">
-                    <SearchBar />
+                    <SearchBar setSearchState={setSearchWord} />
                 </div>
             </div>
             <div className="row flex-grow-1">
-                <div className="col-12 h-100 container-fluid">
+                <div className="col-12 h-100 container-fluid text-muted">
                     <div className="row">
-                        <div className="col-4 bg-white border history-header-element">
+                        <div className="col-4 bg-white border  history-header-element">
                             Name
                         </div>
-                        <div className="col-2 bg-white border history-header-element">
+                        <div className="col-2 bg-white border  history-header-element">
                             Amount
                         </div>
-                        <div className="col-3 bg-white border history-header-element">
+                        <div className="col-3 bg-white border  history-header-element">
                             Filled
                         </div>
-                        <div className="col-3 bg-white border history-header-element">
+                        <div className="col-3 bg-white border  history-header-element">
                             Time
                         </div>
                     </div>
                     <div className="row">
                         <div className="col-12 bg-white border history-container">
-                            {PLACEHOLDER_HISTORY.map((fill, index) => (
+                            {filteredHistory.map((fill, index) => (
                                 <HistoryRow key={index} fill={fill} />
                             ))}
                         </div>
