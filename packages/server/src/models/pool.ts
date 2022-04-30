@@ -2,7 +2,7 @@ import BigNumber from "bignumber.js";
 import mysql, { RowDataPacket } from "mysql2";
 import { getAmountIn, getAmountOut, getRatio } from "../amm";
 import { EXPONENT } from "../constants";
-import { ServerResponse, SwapResponse } from "../types";
+import { QuoteResponse, ServerResponse, SwapResponse } from "../types";
 
 export async function createPair(connection: mysql.Connection, ccy1: string, ccy2: string) {
   const name = `${ccy1}_${ccy2}`;
@@ -289,9 +289,9 @@ export async function getBuyQuote(
   connection: mysql.Connection,
   ccy1: string,
   ccy2: string,
-  amount: bigint,
+  amount: string,
   amountIsInput: boolean,
-): Promise<{ idealPrice: number; actualPrice: number; amtCcy1: string; amtCcy2: string; slippage: number }> {
+): Promise<ServerResponse<QuoteResponse>> {
   try {
     const amt: bigint = BigInt(amount);
 
@@ -311,11 +311,29 @@ export async function getBuyQuote(
     const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
     const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
 
+    if (reserve1 == null || reserve2 == null || reserve1 <= 0 || reserve2 <= 0) {
+      return {
+        error: {
+          type: "INSUFFICIENT_LIQUIDITY",
+          message: "Insufficient liquidity",
+        },
+      };
+    }
+
     let other: bigint;
-    if (amountIsInput) {
-      other = getAmountOut(amt, reserve2, reserve1);
-    } else {
-      other = getAmountIn(amt, reserve2, reserve1);
+    try {
+      if (amountIsInput) {
+        other = getAmountOut(amt, reserve2, reserve1);
+      } else {
+        other = getAmountIn(amt, reserve2, reserve1);
+      }
+    } catch (err) {
+      return {
+        error: {
+          type: "INSUFFICIENT_LIQUIDITY",
+          message: "Insufficient liquidity",
+        },
+      };
     }
 
     const idealPrice = getRatio(reserve1, reserve2);
@@ -326,11 +344,13 @@ export async function getBuyQuote(
     const slippage = (actualPrice - idealPrice) / idealPrice;
 
     return {
-      idealPrice,
-      actualPrice,
-      amtCcy1: amtCcy1.toString(),
-      amtCcy2: amtCcy2.toString(),
-      slippage,
+      data: {
+        idealPrice,
+        actualPrice,
+        amtCcy1: amtCcy1.toString(),
+        amtCcy2: amtCcy2.toString(),
+        slippage,
+      },
     };
   } catch (err) {
     console.error(err);
@@ -342,9 +362,9 @@ export async function getSellQuote(
   connection: mysql.Connection,
   ccy1: string,
   ccy2: string,
-  amount: bigint,
+  amount: string,
   amountIsInput: boolean,
-): Promise<{ idealPrice: number; actualPrice: number; amtCcy1: string; amtCcy2: string; slippage: number }> {
+): Promise<ServerResponse<QuoteResponse>> {
   try {
     const amt: bigint = BigInt(amount);
 
@@ -364,12 +384,30 @@ export async function getSellQuote(
     const { reserve1: _reserve1, reserve2: _reserve2 } = rows[0];
     const [reserve1, reserve2] = [BigInt(_reserve1), BigInt(_reserve2)];
 
+    if (reserve1 == null || reserve2 == null || reserve1 <= 0 || reserve2 <= 0) {
+      return {
+        error: {
+          type: "INSUFFICIENT_LIQUIDITY",
+          message: "Insufficient liquidity",
+        },
+      };
+    }
+
     let other: bigint;
-    console.log(amountIsInput);
-    if (amountIsInput) {
-      other = getAmountOut(amt, reserve1, reserve2);
-    } else {
-      other = getAmountIn(amt, reserve1, reserve2);
+    try {
+      console.log(amountIsInput);
+      if (amountIsInput) {
+        other = getAmountOut(amt, reserve1, reserve2);
+      } else {
+        other = getAmountIn(amt, reserve1, reserve2);
+      }
+    } catch (err) {
+      return {
+        error: {
+          type: "INSUFFICIENT_LIQUIDITY",
+          message: "Insufficient liquidity",
+        },
+      };
     }
 
     const idealPrice = getRatio(reserve1, reserve2);
@@ -380,11 +418,13 @@ export async function getSellQuote(
     const slippage = (actualPrice - idealPrice) / idealPrice;
 
     return {
-      idealPrice,
-      actualPrice,
-      amtCcy1: amtCcy1.toString(),
-      amtCcy2: amtCcy2.toString(),
-      slippage,
+      data: {
+        idealPrice,
+        actualPrice,
+        amtCcy1: amtCcy1.toString(),
+        amtCcy2: amtCcy2.toString(),
+        slippage,
+      },
     };
   } catch (err) {
     console.error(err);
