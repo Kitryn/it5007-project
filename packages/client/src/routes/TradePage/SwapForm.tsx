@@ -17,7 +17,8 @@ const SwapForm = () => {
     const [upperInputDelayed] = useDebounce(upperInput, 1000)
 
     const [selections, setSelections] = useState<string[]>()
-    const htmlRef = useRef<HTMLInputElement>(null)
+    const upperHtmlRef = useRef<HTMLInputElement>(null)
+    const lowerHtmlRef = useRef<HTMLInputElement>(null)
     const [quotation, setQuotation] = useState<Quote>()
 
     useEffect(() => {
@@ -39,7 +40,7 @@ const SwapForm = () => {
     function resetState() {
         setUpperInput(0)
         setQuotation(undefined)
-        const node = htmlRef.current
+        const node = upperHtmlRef.current
         if (node) {
             node.value = ""
         }
@@ -119,16 +120,22 @@ const SwapForm = () => {
             amount: 0,
             isBuy: true,
         }
+        const node = lowerHtmlRef.current
+        let lowerInputDelayed
+        if (node) {
+            lowerInputDelayed = node.innerText
+        }
         if (selectedCurrencyPrimary === "SGD") {
             swap.base = selectedCurrencySecondary
-            swap.amount = upperInputDelayed
+            swap.amount = lowerInputDelayed
             swap.isBuy = false
         } else {
             swap.base = selectedCurrencyPrimary
             swap.amount = upperInputDelayed
             swap.isBuy = true
         }
-        console.log(swap)
+        // console.log(swap)
+        // console.log(lowerHtmlRef.current?.innerText)
 
         postSwap(swap.base, swap.quote, swap.amount, swap.isBuy).then((res) => {
             if (res?.error) {
@@ -136,7 +143,7 @@ const SwapForm = () => {
                 resetState()
             } else if (res?.data) {
                 // TODO: Show some feedback, modal?
-                alert(`${res.data}`)
+                alert(`transcation success`)
             }
         })
         resetState()
@@ -166,7 +173,7 @@ const SwapForm = () => {
                                 }}
                                 placeholder="0.00"
                                 autoFocus
-                                ref={htmlRef}
+                                ref={upperHtmlRef}
                                 onChange={(e) => {
                                     const value = e.target.value
                                     if (
@@ -238,6 +245,7 @@ const SwapForm = () => {
                                     width: "9em",
                                     fontSize: "3em",
                                 }}
+                                ref={lowerHtmlRef}
                             >
                                 {quotation
                                     ? selectedCurrencyPrimary === "SGD"
