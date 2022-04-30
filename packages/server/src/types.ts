@@ -72,3 +72,7 @@ export interface ServerResponse<T> {
   data?: T;
   error?: ResponseError;
 }
+
+export interface AirdropResponse {
+  id: string;
+}

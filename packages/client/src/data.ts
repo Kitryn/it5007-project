@@ -94,3 +94,7 @@ export interface SwapResponse {
     amtQuote: string
     actualPrice: string
 }
+
+export interface AirdropResponse {
+    id: string
+}

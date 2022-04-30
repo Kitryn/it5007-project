@@ -1,15 +1,16 @@
 import mysql, { RowDataPacket } from "mysql2";
-import { History, RequestStatus, RequestType } from "../types";
+import { EXPONENT } from "../constants";
+import { AirdropResponse, History, RequestStatus, RequestType, ServerResponse } from "../types";
 import { calculateLpTokenShare, getPrice } from "./pool";
 
 export async function upsertBalance(connection: mysql.Connection, uid: string, ccy: string, amount: bigint) {
   await connection.promise().execute(
     `
     INSERT INTO balances (uid, ccy_id, amount)
-    VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?)
-    ON DUPLICATE KEY UPDATE amount = ?, updated_at = NOW();
+    VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?) as new
+    ON DUPLICATE KEY UPDATE balances.amount = balances.amount + new.amount, updated_at = NOW();
   `,
-    [uid, ccy, amount, amount],
+    [uid, ccy, amount],
   );
 }
 
@@ -196,4 +197,58 @@ export async function getAirdropStatus(connection: mysql.Connection, uid: string
   return true;
 }
 
-export async function upsertAirdropStatus(connection: mysql.Connection, uid: string, aidropId: string): Promise<void> {}
+export async function claimAirdrop(
+  connection: mysql.Connection,
+  uid: string,
+  airdropId: string,
+): Promise<ServerResponse<AirdropResponse>> {
+  try {
+    await connection.promise().beginTransaction();
+
+    const [res] = await connection.promise().execute<RowDataPacket[][]>(
+      `
+      SELECT * FROM airdrops
+      WHERE uid = ?
+      AND airdrop_id = ?
+    `,
+      [uid, airdropId],
+    );
+
+    if (res.length !== 0) {
+      // airdrop already claimed
+      await connection.promise().rollback();
+      return {
+        error: {
+          type: "INVALID_ARGUMENTS",
+          message: "Airdrop already claimed",
+        },
+      };
+    }
+
+    await connection.promise().execute(
+      `
+      INSERT INTO airdrops (uid, airdrop_id)
+      VALUES (?, ?);
+    `,
+      [uid, airdropId],
+    );
+
+    // Insert balances
+    await upsertBalance(connection, uid, "BTC", 1n * EXPONENT);
+    await upsertBalance(connection, uid, "ETH", 10n * EXPONENT);
+    await upsertBalance(connection, uid, "SOL", 100n * EXPONENT);
+    await upsertBalance(connection, uid, "SGD", 1000000n * EXPONENT);
+
+    await connection.promise().commit();
+
+    return {
+      data: {
+        id: airdropId,
+      },
+    };
+  } catch (err) {
+    console.error(err);
+    await connection.promise().rollback();
+    throw err;
+  }
+}
