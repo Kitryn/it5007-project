@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { clearTimeout } from "timers"
-import { getPairs, getQuote } from "../../api"
+import { getPairs, getQuote, postSwap } from "../../api"
 import PushableButton from "../../components/UI/PushableButton"
 import "./form.css"
 import { useDebounce } from "use-debounce"
@@ -36,6 +36,14 @@ const SwapForm = () => {
     function onSelectHanderSecondary(e: any) {
         setSelectedCurrencySecondary(e.target.innerText)
     }
+    function resetState() {
+        setUpperInput(0)
+        setQuotation(undefined)
+        const node = htmlRef.current
+        if (node) {
+            node.value = ""
+        }
+    }
 
     useEffect(() => {
         selections?.sort()
@@ -50,12 +58,7 @@ const SwapForm = () => {
             }
         }
 
-        setUpperInput(0)
-        setQuotation(undefined)
-        const node = htmlRef.current
-        if (node) {
-            node.value = ""
-        }
+        resetState()
     }, [selections, selectedCurrencyPrimary])
 
     useEffect(() => {
@@ -82,7 +85,6 @@ const SwapForm = () => {
                 quotation.amountBase = upperInputDelayed
                 quotation.isBuy = true
             }
-            console.log(quotation)
 
             getQuote(
                 quotation.base,
@@ -105,6 +107,30 @@ const SwapForm = () => {
 
     function onSubmitHandler(e: any) {
         e.preventDefault()
+        const swap: {
+            base: string
+            quote: string
+            amount: number
+            isBuy: boolean
+        } = {
+            base: "",
+            quote: "SGD",
+            amount: 0,
+            isBuy: true,
+        }
+        if (selectedCurrencyPrimary === "SGD") {
+            swap.base = selectedCurrencySecondary
+            swap.amount = upperInputDelayed
+            swap.isBuy = false
+        } else {
+            swap.base = selectedCurrencyPrimary
+            swap.amount = upperInputDelayed
+            swap.isBuy = true
+        }
+        console.log(swap)
+
+        postSwap(swap.base, swap.quote, swap.amount, swap.isBuy)
+        resetState()
     }
     return (
         <>
@@ -294,14 +320,23 @@ const SwapForm = () => {
                             </div>
                             <div className="row text-muted fs-3 pt-3">
                                 <div className="col">
-                                    <p className="text-start">Slippage</p>
-                                </div>
-                                <div className="col">
-                                    <p className="text-end">
+                                    <p className="text-start">
+                                        Slippage{" "}
                                         {(
                                             Math.abs(quotation.slippage) * 100
                                         ).toFixed(1)}
                                         %
+                                    </p>
+                                </div>
+                                <div className="col">
+                                    <p className="text-end">
+                                        {(
+                                            Math.abs(
+                                                quotation.actualPrice -
+                                                    quotation.idealPrice
+                                            ) * parseFloat(quotation.amtCcy1)
+                                        ).toFixed(2)}{" "}
+                                        SGD
                                     </p>
                                 </div>
                             </div>
