@@ -30,3 +30,6 @@ firebase-admin.json
 
 # dev
 .env
+
+# console files
+*.exe
