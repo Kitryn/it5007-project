@@ -102,9 +102,9 @@ app.get("/api/debug/initialise", [isLoggedInMiddleware, isAdminMiddleware], asyn
     await createPair(connection, "ETH", "SGD");
     await createPair(connection, "SOL", "SGD");
 
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "BTC", "SGD", 1000n * EXPONENT, 53018000n * EXPONENT);
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "ETH", "SGD", 10000n * EXPONENT, 38647600n * EXPONENT);
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "SOL", "SGD", 270270n * EXPONENT, 35000000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "BTC", "SGD", 10000n * EXPONENT, 53018000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "ETH", "SGD", 100000n * EXPONENT, 38647600n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "SOL", "SGD", 2702700n * EXPONENT, 35000000n * EXPONENT);
 
     res.send("OK");
   } catch (err: any) {
