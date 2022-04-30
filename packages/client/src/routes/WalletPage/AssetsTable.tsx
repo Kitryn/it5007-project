@@ -132,10 +132,10 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                                 {parseFloat(crypto.earningValue).toFixed(2)}
                             </td>
                             <td className="">
-                                <div className="row ps-5">
-                                    <div className="col-6 d-grid ">
+                                <div className="row ms-xl-5">
+                                    <div className="col-lg-5 col-md-12 d-grid py-1">
                                         <button
-                                            className="btn btn-outline-primary"
+                                            className="btn btn-outline-primary w-md-100"
                                             style={{ width: "80px" }}
                                             onClick={() =>
                                                 openModal({
@@ -148,9 +148,9 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                                             Send
                                         </button>
                                     </div>
-                                    <div className="col-6 d-grid ">
+                                    <div className="col-lg-4 col-md-12 d-grid py-1">
                                         <button
-                                            className="btn btn-outline-primary"
+                                            className="btn btn-outline-primary w-md-100"
                                             style={{ width: "80px" }}
                                             onClick={() =>
                                                 openModal({
