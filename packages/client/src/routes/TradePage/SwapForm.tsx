@@ -94,9 +94,10 @@ const SwapForm = () => {
                 quotation.amountQuote
             )
                 .then((res) => {
-                    if (res) {
-                        setQuotation(res)
-                        console.log(res)
+                    if (res?.data) {
+                        setQuotation(res.data)
+                    } else if (res?.error) {
+                        alert(`${res.error.type}: ${res.error.message}`)
                     }
                 })
                 .catch((err) => {
@@ -129,7 +130,15 @@ const SwapForm = () => {
         }
         console.log(swap)
 
-        postSwap(swap.base, swap.quote, swap.amount, swap.isBuy)
+        postSwap(swap.base, swap.quote, swap.amount, swap.isBuy).then((res) => {
+            if (res?.error) {
+                alert(`${res.error.type}: ${res.error.message}`)
+                resetState()
+            } else if (res?.data) {
+                // TODO: Show some feedback, modal?
+                alert(`${res.data}`)
+            }
+        })
         resetState()
     }
     return (

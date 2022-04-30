@@ -74,3 +74,22 @@ export interface Quote {
     amtCcy2: string
     slippage: number
 }
+
+export interface ResponseError {
+    type: "USER_NO_FUNDS" | "INSUFFICIENT_LIQUIDITY" | "INVALID_ARGUMENTS"
+    message?: string
+}
+
+export interface ServerResponse<T> {
+    data?: T
+    error?: ResponseError
+}
+
+export interface SwapResponse {
+    base: string
+    quote: string
+    isBuy: boolean
+    amtBase: string
+    amtQuote: string
+    actualPrice: string
+}

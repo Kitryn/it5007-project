@@ -500,18 +500,22 @@ app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response
     const amount = amountBase || amountQuote;
     const amt = new BigNumber(amount!.toString()).multipliedBy(EXPONENT.toString()).integerValue().toString();
 
-    let quoteRes;
+    let quoteRes: ServerResponse<QuoteResponse>;
     if (_buy) {
-      quoteRes = await getBuyQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+      quoteRes = await getBuyQuote(connection, base.toString(), quote.toString(), amt, amountIsInput);
     } else {
-      quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+      quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), amt, amountIsInput);
+    }
+
+    if (quoteRes.error != null) {
+      return res.status(404).send(quoteRes);
     }
 
     const _response = {
       data: {
-        ...quoteRes,
-        amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
-        amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
+        ...quoteRes.data!,
+        amtCcy1: new BigNumber(quoteRes.data!.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
+        amtCcy2: new BigNumber(quoteRes.data!.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
       },
     };
 
