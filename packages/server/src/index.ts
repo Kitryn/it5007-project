@@ -19,7 +19,16 @@ import {
   upsertBalance,
   upsertRequest,
 } from "./models/wallet";
-import { CoinBalance, QuoteResponse, RequestStatus, RequestType, ResponseError, ServerResponse, Wallet } from "./types";
+import {
+  CoinBalance,
+  QuoteResponse,
+  RequestStatus,
+  RequestType,
+  ResponseError,
+  ServerResponse,
+  SwapResponse,
+  Wallet,
+} from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
 import {
@@ -298,14 +307,31 @@ app.post("/api/prices", [isLoggedInMiddleware], async (req: Request, res: Respon
  * Perform a swap for a user
  * Relies on database constraints to throw an error if the user doesn't have enough balance
  */
-app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse<SwapResponse>>) => {
   try {
     const uid = req.decodedToken!.uid;
     const { base, quote, amount, isBuy }: { base: string; quote: string; amount: number; isBuy: boolean } = req.body;
 
-    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
-    await swap(connection, uid, base, quote, amt, isBuy);
-    res.send("OK");
+    let error: ResponseError;
+    if (base == null || quote == null || amount == null || isBuy == null) {
+      error = { type: "INVALID_ARGUMENTS" };
+      return res.status(400).send({ error });
+    }
+
+    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString());
+
+    if (!amt.isInteger()) {
+      error = { type: "INVALID_ARGUMENTS", message: "Amount too many decimal places" };
+      return res.status(400).send({ error });
+    }
+
+    if (amt.isZero() || amt.isNegative() || amt.isNaN() || !amt.isFinite()) {
+      error = { type: "INVALID_ARGUMENTS", message: "Amount must be a positive number" };
+      return res.status(400).send({ error });
+    }
+
+    await swap(connection, uid, base, quote, amt.integerValue().toString(), isBuy);
+    res.send("OK" as any); // todo
   } catch (err: any) {
     console.error(err);
     res.status(400).send(err.toString()); // don't send err message in real app
