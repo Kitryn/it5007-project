@@ -21,17 +21,23 @@ export default function WalletPage() {
         coin_qty: [],
     })
 
+    function loadData() {
+        setTimeout(() => {
+            getWallet().then((wallet) => {
+                if (wallet) {
+                    setWallet(wallet)
+                    setWalletImage(wallet)
+                }
+            })
+        }, 500)
+    }
+
     // load wallet
     useEffect(() => {
-        getWallet().then((wallet) => {
-            if (wallet) {
-                setWallet(wallet)
-                setWalletImage(wallet)
-            }
-        })
+        loadData()
     }, [])
 
-    const { fiat, crypto, earning, coin_qty } = wallet
+    const { fiat, crypto, earning } = wallet
 
     const flatAssets = parseFloat(fiat)
     const cryptoAssets = parseFloat(crypto)
