@@ -3,6 +3,7 @@ import AssetTable from "./AssetsTable"
 import { WALLET } from "./DummyWallet"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
+import { debug_initialise, getHistory, getWallet } from "../../api"
 
 export default function WalletPage() {
     const [wallet, setWallet] = useState<Wallet>({
@@ -201,6 +202,9 @@ export default function WalletPage() {
                     </div>
                 </div>
             </div>
+            <button onClick={() => getWallet()}>getWallet</button>
+            <button onClick={() => debug_initialise()}>init</button>
+            <button onClick={() => getHistory()}>getHistory</button>
         </div>
     )
 }

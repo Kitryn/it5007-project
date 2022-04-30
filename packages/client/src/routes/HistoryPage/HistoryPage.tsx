@@ -2,21 +2,34 @@ import HistoryRow from "./HistoryRow"
 import DatePicker from "../../components/DatePicker"
 import SearchBar from "../../components/SearchBar"
 import "./HistoryPage.css"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import date from "date-and-time"
 import { PLACEHOLDER_HISTORY } from "./fixture"
+import { getHistory } from "../../api"
+import { History } from "../../data"
 
 export default function HistoryPage() {
     const today = new Date()
     const [fromDate, setFromDate] = useState(date.addMonths(today, -3))
     const [toDate, setToDate] = useState(today)
     const [searchWord, setSearchWord] = useState("")
+    const [history, setHistory] = useState<History[]>([])
 
-    const filteredHistory = PLACEHOLDER_HISTORY.filter(
-        (history) =>
-            date.subtract(new Date(history.date), fromDate).toDays() >= 0 &&
-            date.subtract(toDate, new Date(history.date)).toDays() >= 0 &&
-            (history.base + history.quote).includes(searchWord)
+    // history dataloaded
+    useEffect(() => {
+        getHistory().then((data) => {
+            const history = data
+            if (history) {
+                setHistory(history)
+            }
+        })
+    }, [])
+
+    const filteredHistory = history.filter(
+        (val: History) =>
+            date.subtract(new Date(val.date), fromDate).toDays() >= 0 &&
+            date.subtract(toDate, new Date(val.date)).toDays() >= 0 &&
+            (val.base + val.quote).includes(searchWord)
     )
 
     return (
