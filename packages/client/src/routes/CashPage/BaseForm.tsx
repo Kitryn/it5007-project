@@ -1,6 +1,7 @@
 import "./form.css"
 import React, { useRef } from "react"
 import PushableButton from "../../components/UI/PushableButton"
+import { postWithdrawRequest } from "../../api"
 
 interface BaseFormProps {
     isDeposit: boolean
@@ -22,14 +23,25 @@ export default class BaseForm extends React.Component<
         super(props)
 
         this.inputElRef = React.createRef()
+        this.onClickHandler = this.onClickHandler.bind(this)
     }
 
     componentDidUpdate() {
         const node = this.inputElRef.current
-
         if (node) {
             node.focus()
         }
+    }
+
+    onClickHandler(e: any) {
+        e.preventDefault()
+        const node = this.inputElRef.current
+        if (node && node.value && parseFloat(node.value)) {
+            console.log(node.value)
+            postWithdrawRequest("SGD", parseFloat(node.value))
+            node.value = ""
+        }
+        return
     }
 
     render() {
@@ -88,7 +100,9 @@ export default class BaseForm extends React.Component<
                 </div>
                 <div className="row p-5">
                     <div className="d-grid gap-2 col-6 mx-auto ">
-                        <PushableButton>{formLabel}</PushableButton>
+                        <PushableButton onClickHandler={this.onClickHandler}>
+                            {formLabel}
+                        </PushableButton>
                     </div>
                 </div>
             </form>
