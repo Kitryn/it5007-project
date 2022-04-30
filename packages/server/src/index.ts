@@ -374,7 +374,14 @@ app.get("/api/history", [isLoggedInMiddleware], async (req: Request, res: Respon
     const uid = req.decodedToken!.uid;
 
     const history = await getTransactionHistory(connection, uid);
-    res.send(history);
+    res.send(
+      history.map((v) => {
+        return {
+          ...v,
+          amt: new BigNumber(v.amt).dividedBy(EXPONENT.toString()).toString(),
+        };
+      }),
+    );
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
