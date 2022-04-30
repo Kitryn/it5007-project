@@ -38,7 +38,7 @@ export default class BaseForm extends React.Component<
         const node = this.inputElRef.current
         if (node && node.value && parseFloat(node.value)) {
             console.log(node.value)
-            postWithdrawRequest("SGD", parseFloat(node.value))
+            postWithdrawRequest("SGD", parseFloat(node.value), "")
             node.value = ""
         }
         return

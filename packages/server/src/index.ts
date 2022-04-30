@@ -12,6 +12,8 @@ import mysql from "mysql2";
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
 import {
+  claimAirdrop,
+  getAirdropStatus,
   getCoinBalances,
   getLpBalances,
   getLpCoinValues,
@@ -19,7 +21,17 @@ import {
   upsertBalance,
   upsertRequest,
 } from "./models/wallet";
-import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
+import {
+  AirdropResponse,
+  CoinBalance,
+  QuoteResponse,
+  RequestStatus,
+  RequestType,
+  ResponseError,
+  ServerResponse,
+  SwapResponse,
+  Wallet,
+} from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
 import {
@@ -38,6 +50,7 @@ const PORT = process.env.PORT ?? 3000;
 const app = express();
 const HOT_WALLET = "0x0d7b26Bfa1D36e648513a80c8D6172583E7a2c5E";
 const EXCHANGE_ONLY_UID = "exchange-only";
+const NEW_USER_AIRDROP_ID = "new-user-airdrop";
 
 if (process.env.NODE_ENV !== "production") {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
@@ -89,9 +102,9 @@ app.get("/api/debug/initialise", [isLoggedInMiddleware, isAdminMiddleware], asyn
     await createPair(connection, "ETH", "SGD");
     await createPair(connection, "SOL", "SGD");
 
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "BTC", "SGD", 1000n * EXPONENT, 53018000n * EXPONENT);
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "ETH", "SGD", 10000n * EXPONENT, 38647600n * EXPONENT);
-    await addLiquidity(connection, EXCHANGE_ONLY_UID, "SOL", "SGD", 270270n * EXPONENT, 35000000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "BTC", "SGD", 10000n * EXPONENT, 53018000n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "ETH", "SGD", 100000n * EXPONENT, 38647600n * EXPONENT);
+    await addLiquidity(connection, EXCHANGE_ONLY_UID, "SOL", "SGD", 2702700n * EXPONENT, 35000000n * EXPONENT);
 
     res.send("OK");
   } catch (err: any) {
@@ -119,12 +132,32 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
   }
 });
 
+app.post(
+  "/api/airdrop",
+  [isLoggedInMiddleware],
+  async (req: Request, res: Response<ServerResponse<AirdropResponse>>) => {
+    try {
+      const uid = req.decodedToken!.uid;
+      const _res = await claimAirdrop(connection, uid, NEW_USER_AIRDROP_ID);
+      if (_res?.error != null) {
+        return res.status(403).send(_res);
+      }
+      res.send(_res);
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).send(err.toString());
+    }
+  },
+);
+
 /**
  * Get the balance of a user
  */
-app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response<Wallet>) => {
   try {
     const uid = req.decodedToken!.uid;
+
+    const claimed = await getAirdropStatus(connection, uid, NEW_USER_AIRDROP_ID);
 
     const coinBalances = await getCoinBalances(connection, uid);
     const lpValues = await getLpCoinValues(connection, uid);
@@ -203,6 +236,7 @@ app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Respons
       crypto: (totalPortfolioValue - totalFiatValue).toString(),
       coin_qty: Array.from(balMap.values()),
       earning: totalEarning.toString(),
+      claimed,
     };
 
     res.send(wallet);
@@ -298,17 +332,37 @@ app.post("/api/prices", [isLoggedInMiddleware], async (req: Request, res: Respon
  * Perform a swap for a user
  * Relies on database constraints to throw an error if the user doesn't have enough balance
  */
-app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse<SwapResponse>>) => {
   try {
     const uid = req.decodedToken!.uid;
     const { base, quote, amount, isBuy }: { base: string; quote: string; amount: number; isBuy: boolean } = req.body;
 
-    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString();
-    await swap(connection, uid, base, quote, amt, isBuy);
-    res.send("OK");
+    let error: ResponseError;
+    if (base == null || quote == null || amount == null || isBuy == null) {
+      error = { type: "INVALID_ARGUMENTS" };
+      return res.status(400).send({ error });
+    }
+
+    const amt = new BigNumber(amount).multipliedBy(EXPONENT.toString());
+
+    if (!amt.isInteger()) {
+      error = { type: "INVALID_ARGUMENTS", message: "Amount too many decimal places" };
+      return res.status(400).send({ error });
+    }
+
+    if (amt.isZero() || amt.isNegative() || amt.isNaN() || !amt.isFinite()) {
+      error = { type: "INVALID_ARGUMENTS", message: "Amount must be a positive number" };
+      return res.status(400).send({ error });
+    }
+
+    const _res = await swap(connection, uid, base, quote, amt.integerValue().toString(), isBuy);
+    if (_res.error != null) {
+      return res.status(403).send(_res);
+    }
+    res.send(_res);
   } catch (err: any) {
     console.error(err);
-    res.status(400).send(err.toString()); // don't send err message in real app
+    res.status(500).send(err.toString()); // don't send err message in real app
   }
 });
 
@@ -320,7 +374,14 @@ app.get("/api/history", [isLoggedInMiddleware], async (req: Request, res: Respon
     const uid = req.decodedToken!.uid;
 
     const history = await getTransactionHistory(connection, uid);
-    res.send(history);
+    res.send(
+      history.map((v) => {
+        return {
+          ...v,
+          amt: new BigNumber(v.amt).dividedBy(EXPONENT.toString()).toString(),
+        };
+      }),
+    );
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
@@ -444,24 +505,26 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
  * GET request for getting buy swap quotes
  * URL query params: base, quote, isBuy, and exactly one of amountBase, amountQuote
  */
-app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse<QuoteResponse>>) => {
   try {
     let { base, quote, amountBase, amountQuote, isBuy } = req.query;
 
+    let error: ResponseError = { type: "INVALID_ARGUMENTS" };
+
     if (base == null || quote == null || isBuy == null) {
-      return res.status(400).send("Missing params");
+      return res.status(400).send({ error });
     }
 
     if (isBuy != "true" && isBuy != "false") {
-      return res.status(400).send("Invalid isBuy");
+      return res.status(400).send({ error });
     }
     const _buy = isBuy === "true";
 
     if (amountBase == null && amountQuote == null) {
-      return res.status(400).send("Missing amount");
+      return res.status(400).send({ error });
     }
     if (amountBase != null && amountQuote != null) {
-      return res.status(400).send("Cannot specify both amountBase and amountQuote");
+      return res.status(400).send({ error });
     }
 
     const amountIsInput = _buy ? amountQuote != null : amountBase != null;
@@ -469,18 +532,26 @@ app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response
     const amount = amountBase || amountQuote;
     const amt = new BigNumber(amount!.toString()).multipliedBy(EXPONENT.toString()).integerValue().toString();
 
-    let quoteRes;
+    let quoteRes: ServerResponse<QuoteResponse>;
     if (_buy) {
-      quoteRes = await getBuyQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+      quoteRes = await getBuyQuote(connection, base.toString(), quote.toString(), amt, amountIsInput);
     } else {
-      quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
+      quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), amt, amountIsInput);
     }
 
-    res.send({
-      ...quoteRes,
-      amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
-      amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
-    });
+    if (quoteRes.error != null) {
+      return res.status(404).send(quoteRes);
+    }
+
+    const _response = {
+      data: {
+        ...quoteRes.data!,
+        amtCcy1: new BigNumber(quoteRes.data!.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
+        amtCcy2: new BigNumber(quoteRes.data!.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
+      },
+    };
+
+    res.send(_response);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());

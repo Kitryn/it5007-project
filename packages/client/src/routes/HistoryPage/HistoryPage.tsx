@@ -52,13 +52,13 @@ export default function HistoryPage() {
             <div className="row flex-grow-1">
                 <div className="col-12 h-100 container-fluid text-muted">
                     <div className="row">
-                        <div className="col-4 bg-white border  history-header-element">
+                        <div className="col-2 bg-white border  history-header-element">
                             Name
                         </div>
-                        <div className="col-2 bg-white border  history-header-element">
+                        <div className="col-3 bg-white border  history-header-element">
                             Amount
                         </div>
-                        <div className="col-3 bg-white border  history-header-element">
+                        <div className="col-4 bg-white border  history-header-element">
                             Filled
                         </div>
                         <div className="col-3 bg-white border  history-header-element">
