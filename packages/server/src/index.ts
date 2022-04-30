@@ -52,15 +52,18 @@ initializeApp({
 });
 
 // Create the MySQL connection to Google Cloud SQL
+const isWin = process.platform === "win32";
 const dbSocketPath = process.env.DB_SOCKET_PATH || "/cloudsql";
-const connection = mysql.createConnection({
+const mySqlConfigs = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  socketPath: `${dbSocketPath}/${process.env.INSTANCE_CONNECTION_NAME}`,
   supportBigNumbers: true,
   bigNumberStrings: true,
-});
+  ...(isWin ? {} : { socketPath: `${dbSocketPath}/${process.env.INSTANCE_CONNECTION_NAME}` }),
+  ...(isWin ? { host: "127.0.0.1", port: 3306 } : {}),
+};
+const connection = mysql.createConnection(mySqlConfigs);
 
 /**
  * Middleware
