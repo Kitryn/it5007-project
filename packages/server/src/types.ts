@@ -59,7 +59,7 @@ export interface SwapResponse {
   isBuy: boolean;
   amtBase: string;
   amtQuote: string;
-  actualPrice: number;
+  actualPrice: string;
 }
 
 export interface ResponseError {
