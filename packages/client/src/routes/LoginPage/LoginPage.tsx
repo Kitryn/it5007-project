@@ -24,24 +24,42 @@ const LoginPage = () => {
                         <div className="pb-5"></div>
                         <div className="pb-5"></div>
                         <h3 className="fw-bold">
-                            Lorem ipsum dolor, sit amet consectetur adipisicing
-                            elit.
+                            Swap, earn, and build on the leading decentralized
+                            crypto trading protocol
                         </h3>
-                        <p className="tw-light text-muted pb-3">
-                            Welcome back! Please login to your account.
-                        </p>
-                        <GoogleAuth></GoogleAuth>
-                        <div className="text-center text-muted py-3">
-                            - Or -
+                        <div className="row text-dark mb-3">
+                            <div className="col-1">
+                                <i className="bi bi-twitter"></i>
+                            </div>
+                            <div className="col-1">
+                                <i className="bi bi-twitch"></i>
+                            </div>
+                            <div className="col-1">
+                                <i className="bi bi-facebook"></i>
+                            </div>
+                            <div className="col-1">
+                                <i className="bi bi-reddit"></i>
+                            </div>
+                            <div className="col-8"></div>
                         </div>
-                        <div className="d-grid">
-                            <button
-                                className="btn btn-primary fs-5"
-                                type="button"
-                            >
-                                Continue as Guest
-                            </button>{" "}
-                            {/* // TODO: navigate to market board only */}
+                        <div className="row">
+                            <p className="tw-light text-muted pb-3">
+                                Welcome back! Please login to your account.
+                            </p>
+                        </div>
+                        <div className="row">
+                            <GoogleAuth></GoogleAuth>
+                        </div>
+                        <div
+                            className="row text-muted align-items-end"
+                            style={{ height: 200 }}
+                        >
+                            <div className="col text-center">
+                                Create by Ding Ming & Yi Xunchen
+                            </div>
+                        </div>
+                        <div className="row text-muted ">
+                            <div className="col text-center">-- IT5007 --</div>
                         </div>
                     </div>
                     <div
@@ -53,7 +71,6 @@ const LoginPage = () => {
                             alt="BitCoin Image"
                             className="img-fluid"
                         />
-                        {/* <AboutUs /> */}
                     </div>
                 </div>
             </div>
