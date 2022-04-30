@@ -19,7 +19,7 @@ import {
   upsertBalance,
   upsertRequest,
 } from "./models/wallet";
-import { CoinBalance, RequestStatus, RequestType, ResponseError, ServerResponse, Wallet } from "./types";
+import { CoinBalance, QuoteResponse, RequestStatus, RequestType, ResponseError, ServerResponse, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
 import {
@@ -444,13 +444,11 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
  * GET request for getting buy swap quotes
  * URL query params: base, quote, isBuy, and exactly one of amountBase, amountQuote
  */
-app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse>) => {
+app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse<QuoteResponse>>) => {
   try {
     let { base, quote, amountBase, amountQuote, isBuy } = req.query;
 
-    let error: ResponseError = {
-      type: "INVALID_ARGUMENTS",
-    };
+    let error: ResponseError = { type: "INVALID_ARGUMENTS" };
 
     if (base == null || quote == null || isBuy == null) {
       return res.status(400).send({ error });

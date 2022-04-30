@@ -64,9 +64,10 @@ export interface SwapResponse {
 
 export interface ResponseError {
   type: "USER_NO_FUNDS" | "INSUFFICIENT_LIQUIDITY" | "INVALID_ARGUMENTS";
+  message?: string;
 }
 
-export interface ServerResponse {
-  data?: QuoteResponse | SwapResponse;
+export interface ServerResponse<T> {
+  data?: T;
   error?: ResponseError;
 }
