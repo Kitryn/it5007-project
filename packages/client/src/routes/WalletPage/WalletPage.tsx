@@ -3,7 +3,7 @@ import AssetTable from "./AssetsTable"
 import { WALLET } from "./DummyWallet"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
-import { debug_initialise, getHistory, getWallet } from "../../api"
+import { debug_funds, debug_initialise, getHistory, getWallet } from "../../api"
 
 export default function WalletPage() {
     const [wallet, setWallet] = useState<Wallet>({
@@ -15,9 +15,11 @@ export default function WalletPage() {
 
     // load wallet
     useEffect(() => {
-        setTimeout(() => {
-            setWallet(WALLET)
-        }, 500)
+        getWallet().then((wallet) => {
+            if (wallet) {
+                setWallet(wallet)
+            }
+        })
     }, [])
 
     const { fiat, crypto, earning, coin_qty } = wallet
@@ -202,9 +204,8 @@ export default function WalletPage() {
                     </div>
                 </div>
             </div>
-            <button onClick={() => getWallet()}>getWallet</button>
             <button onClick={() => debug_initialise()}>init</button>
-            <button onClick={() => getHistory()}>getHistory</button>
+            <button onClick={() => debug_funds()}>fund</button>
         </div>
     )
 }

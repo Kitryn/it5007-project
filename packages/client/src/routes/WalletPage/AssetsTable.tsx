@@ -44,9 +44,9 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                 </thead>
                 <tbody>
                     {cryptoAssets.map((crypto: CoinBalance) => (
-                        <tr key={crypto.name}>
+                        <tr key={crypto.symbol}>
                             <td className="text-end">
-                                {crypto.name.toUpperCase()}
+                                {crypto.symbol.toUpperCase()}
                             </td>
                             <td className="text-end">
                                 {parseFloat(crypto.qty).toFixed(2)}
@@ -61,7 +61,7 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                                         : "text-danger"
                                 }`}
                             >
-                                {parseFloat(crypto.earning).toFixed(2)}
+                                {parseFloat(crypto.earningValue).toFixed(2)}
                             </td>
                             <td className="">
                                 <div className="row ps-5">
