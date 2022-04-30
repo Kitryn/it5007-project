@@ -2,7 +2,12 @@ import { Link } from "react-router-dom"
 import AssetTable from "./AssetsTable"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
-import { debug_funds, debug_initialise, getWallet } from "../../api"
+import {
+    debug_funds,
+    debug_initialise,
+    getWallet,
+    claimAirdrop,
+} from "../../api"
 import Modal from "react-modal"
 
 Modal.setAppElement("#modal")
@@ -21,12 +26,34 @@ export default function WalletPage() {
         coin_qty: [],
     })
 
+    const [newUser, setNewUser] = useState<boolean>(false)
+    const [modalIsOpen, setIsOpen] = useState(false)
+    const customStyles = {
+        content: {
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+        },
+    }
+    function closeModal() {
+        setIsOpen(false)
+    }
+
     function loadData() {
         setTimeout(() => {
             getWallet().then((wallet) => {
                 if (wallet) {
                     setWallet(wallet)
                     setWalletImage(wallet)
+                    console.log(wallet)
+                    if (!wallet.claimed) {
+                        // not claim == new user
+                        setNewUser(true)
+                        setIsOpen(true)
+                    }
                 }
             })
         }, 500)
@@ -184,6 +211,59 @@ export default function WalletPage() {
                     </div>
                 </div>
             </div>
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                style={customStyles}
+            >
+                <div className="container" style={{ width: "50%" }}>
+                    <div className="my-5">
+                        <div className="row text-center">
+                            <h3 className="text-primary fw-bold ">
+                                Welcome to MazeSoba
+                            </h3>
+                            <p>
+                                As part of our newly launched promotion, all new
+                                users will receive funds of random amount.
+                            </p>
+                            <div className="row mb-3">
+                                <div className="col">
+                                    <i className="bi bi-gift-fill fs-1 text-success"></i>
+                                </div>
+                                <div className="col">
+                                    <i className="bi bi-gift-fill fs-1 text-primary"></i>
+                                </div>
+                                <div className="col">
+                                    <i className="bi bi-gift-fill fs-1 text-danger"></i>
+                                </div>
+                            </div>
+                            <div className="row mb-3 text-center">
+                                <h3>Click Here to receive your fund</h3>
+                                <i
+                                    className="bi bi-caret-down-fill text-primary"
+                                    style={{ fontSize: 70 }}
+                                ></i>
+                            </div>
+                            <div className="row">
+                                <div className="col-4"></div>
+                                <div className="col-4">
+                                    <button
+                                        className="btn btn-primary fs-4 w-100"
+                                        onClick={() =>
+                                            claimAirdrop().then((res) =>
+                                                console.log(res)
+                                            )
+                                        }
+                                    >
+                                        Claim Now
+                                    </button>
+                                </div>
+                                <div className="col-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
             <button onClick={() => debug_initialise()}>init</button>
             <button onClick={() => debug_funds()}>fund</button>
         </div>

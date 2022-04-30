@@ -171,10 +171,8 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
             </table>
             <Modal
                 isOpen={modalIsOpen}
-                // onAfterOpen={afterOpenModal}
                 onRequestClose={closeModal}
                 style={customStyles}
-                contentLabel="Example Modal"
             >
                 <div className="container">
                     <div className="row mb-1">
