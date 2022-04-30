@@ -175,7 +175,7 @@ const SwapForm = ({ selected }) => {
                         </div>
                     </div>
                     <div className="row pt-3">
-                        <PushableButton>
+                        <PushableButton onClickHandler={() => null}>
                             {selected.toUpperCase()}
                         </PushableButton>
                     </div>

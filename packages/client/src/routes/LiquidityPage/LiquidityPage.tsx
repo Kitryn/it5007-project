@@ -69,7 +69,11 @@ const LiquidityPage = () => {
                                         </div>
                                     </div>
                                     <div className="row pt-3">
-                                        <PushableButton>Approve</PushableButton>
+                                        <PushableButton
+                                            onClickHandler={() => null}
+                                        >
+                                            Approve
+                                        </PushableButton>
                                     </div>
                                 </div>
                                 <div className="col-2"></div>

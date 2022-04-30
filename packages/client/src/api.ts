@@ -155,7 +155,8 @@ export async function getHistory(): Promise<History[] | null> {
 
 export async function postWithdrawRequest(
     ccy: string,
-    amount: number
+    amount: number,
+    address: string
 ): Promise<boolean> {
     if (amount <= 0) {
         console.error("Invalid amount")
@@ -176,6 +177,7 @@ export async function postWithdrawRequest(
         body: JSON.stringify({
             ccy,
             amount,
+            address,
         }),
     })
     console.log(res)

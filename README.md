@@ -52,6 +52,12 @@ Feel free to rip this entire thing out to scaffold from scratch; the only requir
 
 express.js based backend. Pending addition of MongoDB
 
+### Local development
+
+```bash
+$ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql -credential_file=./firebase-admin.json
+```
+
 ### Running client locally with docker
 
 ```
