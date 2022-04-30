@@ -1,4 +1,5 @@
 import mysql, { RowDataPacket } from "mysql2";
+import { EXPONENT } from "../constants";
 import { AirdropResponse, History, RequestStatus, RequestType, ServerResponse } from "../types";
 import { calculateLpTokenShare, getPrice } from "./pool";
 
@@ -7,7 +8,7 @@ export async function upsertBalance(connection: mysql.Connection, uid: string, c
     `
     INSERT INTO balances (uid, ccy_id, amount)
     VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?)
-    ON DUPLICATE KEY UPDATE amount = ?, updated_at = NOW();
+    ON DUPLICATE KEY UPDATE balances.amount = balances.amount + amount, updated_at = NOW();
   `,
     [uid, ccy, amount, amount],
   );
@@ -231,6 +232,12 @@ export async function claimAirdrop(
     `,
       [uid, airdropId],
     );
+
+    // Insert balances
+    await upsertBalance(connection, uid, "BTC", 2n * EXPONENT);
+    await upsertBalance(connection, uid, "ETH", 10n * EXPONENT);
+    await upsertBalance(connection, uid, "SOL", 100n * EXPONENT);
+    await upsertBalance(connection, uid, "SGD", 1000000n * EXPONENT);
 
     await connection.promise().commit();
 
