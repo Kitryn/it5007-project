@@ -7,10 +7,10 @@ export async function upsertBalance(connection: mysql.Connection, uid: string, c
   await connection.promise().execute(
     `
     INSERT INTO balances (uid, ccy_id, amount)
-    VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?)
-    ON DUPLICATE KEY UPDATE balances.amount = balances.amount + amount, updated_at = NOW();
+    VALUES (?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?) as new
+    ON DUPLICATE KEY UPDATE balances.amount = balances.amount + new.amount, updated_at = NOW();
   `,
-    [uid, ccy, amount, amount],
+    [uid, ccy, amount],
   );
 }
 
@@ -234,7 +234,7 @@ export async function claimAirdrop(
     );
 
     // Insert balances
-    await upsertBalance(connection, uid, "BTC", 2n * EXPONENT);
+    await upsertBalance(connection, uid, "BTC", 1n * EXPONENT);
     await upsertBalance(connection, uid, "ETH", 10n * EXPONENT);
     await upsertBalance(connection, uid, "SOL", 100n * EXPONENT);
     await upsertBalance(connection, uid, "SGD", 1000000n * EXPONENT);

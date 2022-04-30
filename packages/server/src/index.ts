@@ -133,12 +133,15 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
 });
 
 app.post(
-  "/api/newUserAirdrop",
+  "/api/airdrop",
   [isLoggedInMiddleware],
   async (req: Request, res: Response<ServerResponse<AirdropResponse>>) => {
     try {
       const uid = req.decodedToken!.uid;
       const _res = await claimAirdrop(connection, uid, NEW_USER_AIRDROP_ID);
+      if (_res?.error != null) {
+        res.status(403).send(_res);
+      }
       res.send(_res);
     } catch (err: any) {
       console.error(err);

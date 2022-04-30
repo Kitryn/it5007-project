@@ -8,6 +8,7 @@ import {
     Quote,
     ServerResponse,
     SwapResponse,
+    AirdropResponse,
 } from "./data"
 
 export async function debug_initialise(): Promise<void> {
@@ -324,6 +325,22 @@ export async function getPairs(): Promise<
     }
 
     const res = await fetch("/api/pairs", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    })
+    console.log(res)
+    return await res.json()
+}
+
+export async function claimAirdrop(): Promise<ServerResponse<AirdropResponse> | null> {
+    const accessToken = await getAuth().currentUser?.getIdToken(true)
+    if (accessToken == null) {
+        return null
+    }
+
+    const res = await fetch("/api/airdrop", {
+        method: "POST",
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
