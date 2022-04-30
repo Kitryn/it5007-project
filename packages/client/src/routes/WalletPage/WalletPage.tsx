@@ -4,6 +4,7 @@ import walletData from "./WalletData.json"
 import { WALLET } from "./DummyWallet"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
+import { debug_funds } from "../../api"
 
 export default function WalletPage() {
     const [wallet, setWallet] = useState<Wallet>({
@@ -48,6 +49,7 @@ export default function WalletPage() {
                                 <span className="fs-5 fw-bold">
                                     Total Value
                                 </span>
+                                <button onClick={() => debug_funds()}></button>
                             </div>
                             <div className="row  ">
                                 <span className="">
