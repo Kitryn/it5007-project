@@ -48,7 +48,6 @@ export default function Navbar() {
                                     "wallet",
                                     "trade",
                                     "liquidity",
-                                    "cash",
                                     "history",
                                 ].map((category) => {
                                     return (

@@ -223,7 +223,10 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                                             type="text"
                                             className="form-control"
                                             placeholder={
-                                                "You have " + modalInfo?.qty
+                                                "You have " +
+                                                modalInfo?.qty +
+                                                " " +
+                                                modalInfo?.symbol
                                             }
                                             id="transferQuantity"
                                             aria-describedby="addressHelp"
@@ -238,13 +241,14 @@ export default function AssetTable({ cryptoAssets, onSearchSubmitHandler }) {
                                             htmlFor="walletAddress"
                                             className="form-label"
                                         >
-                                            Target Address
+                                            {modalInfo?.symbol === "SGD"
+                                                ? "Bank Account"
+                                                : "Target Address"}
                                         </label>
                                         <input
                                             type="text"
                                             autoComplete="off"
                                             className="form-control"
-                                            placeholder="wallet address"
                                             id="walletAddress"
                                             aria-describedby="addressHelp"
                                             ref={htmlRef2}

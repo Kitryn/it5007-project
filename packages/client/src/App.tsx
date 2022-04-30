@@ -63,24 +63,7 @@ function App() {
                         </RequireAuth>
                     }
                 />
-                <Route
-                    path="/cash"
-                    element={
-                        <RequireAuth>
-                            <Navbar />
-                            <CashPage />
-                        </RequireAuth>
-                    }
-                />
-                <Route
-                    path="/cash/:tab"
-                    element={
-                        <RequireAuth>
-                            <Navbar />
-                            <CashPage />
-                        </RequireAuth>
-                    }
-                />
+
                 <Route
                     path="/history"
                     element={

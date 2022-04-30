@@ -36,7 +36,6 @@ export default function WalletPage() {
     const flatAssets = parseFloat(fiat)
     const cryptoAssets = parseFloat(crypto)
     const earnings = parseFloat(earning)
-    const coins = coin_qty
 
     const totalAsset = flatAssets + cryptoAssets
 
@@ -90,26 +89,6 @@ export default function WalletPage() {
                                 <span className="fs-3 fw-bold">
                                     {flatAssets.toFixed(2)} SGD
                                 </span>
-                            </div>
-                            <div className="row row-cols-5 g-1 ">
-                                <div className="col">
-                                    <Link
-                                        type={"a"}
-                                        to="/cash/deposit"
-                                        className="text-decoration-none text-muted"
-                                    >
-                                        Deposit
-                                    </Link>
-                                </div>
-                                <div className="col">
-                                    <Link
-                                        type={"a"}
-                                        to="/cash/withdraw"
-                                        className="text-decoration-none text-muted"
-                                    >
-                                        Withdraw
-                                    </Link>
-                                </div>
                             </div>
                         </div>
                         <div className="col">
