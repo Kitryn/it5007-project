@@ -48,7 +48,6 @@ export default function WalletPage() {
                 if (wallet) {
                     setWallet(wallet)
                     setWalletImage(wallet)
-                    console.log(wallet)
                     if (!wallet.claimed) {
                         // not claim == new user
                         setNewUser(true)
@@ -250,10 +249,9 @@ export default function WalletPage() {
                                     <button
                                         className="btn btn-primary fs-4 w-100"
                                         onClick={() => {
-                                            claimAirdrop().then((res) =>
-                                                console.log(res)
+                                            claimAirdrop().then(() =>
+                                                closeModal()
                                             )
-                                            closeModal()
                                         }}
                                     >
                                         Claim Now
