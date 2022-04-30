@@ -84,3 +84,12 @@ export interface ServerResponse<T> {
     data?: T
     error?: ResponseError
 }
+
+export interface SwapResponse {
+    base: string
+    quote: string
+    isBuy: boolean
+    amtBase: string
+    amtQuote: string
+    actualPrice: string
+}

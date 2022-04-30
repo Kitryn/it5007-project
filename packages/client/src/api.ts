@@ -7,6 +7,7 @@ import {
     History,
     Quote,
     ServerResponse,
+    SwapResponse,
 } from "./data"
 
 export async function debug_initialise(): Promise<void> {
@@ -110,16 +111,21 @@ export async function postSwap(
     quote: string,
     amount: number,
     isBuy: boolean
-): Promise<boolean> {
+): Promise<ServerResponse<SwapResponse> | null> {
     // for now we only support SGD
     if (quote !== "SGD") {
         console.error("Only support SGD")
-        return false
+        return {
+            error: {
+                type: "INVALID_ARGUMENTS",
+                message: "Only support SGD",
+            },
+        }
     }
 
     const accessToken = await getAuth().currentUser?.getIdToken(true)
     if (accessToken == null) {
-        return false
+        return null
     }
 
     const res = await fetch("/api/swap", {
@@ -136,7 +142,7 @@ export async function postSwap(
         }),
     })
     console.log(res)
-    return true
+    return await res.json()
 }
 
 export async function getHistory(): Promise<History[] | null> {
