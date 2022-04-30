@@ -334,7 +334,7 @@ app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Resp
   try {
     const uid = req.decodedToken!.uid;
 
-    const { ccy, amount }: { ccy: string; amount: number } = req.body;
+    const { ccy, amount, address }: { ccy: string; amount: number; address: string } = req.body;
 
     // in a real app we should have a validator middleware or library to check ccy, amount, etc
     await upsertRequest(
@@ -344,6 +344,7 @@ app.post("/api/withdraw", [isLoggedInMiddleware], async (req: Request, res: Resp
       RequestStatus.PENDING,
       ccy,
       new BigNumber(amount).multipliedBy(EXPONENT.toString()).toString(),
+      address,
     );
     res.send("OK");
   } catch (err: any) {

@@ -167,13 +167,14 @@ export async function upsertRequest(
   requestStatus: RequestStatus,
   ccy: string,
   amount: string,
+  address: string,
 ) {
   await connection.promise().execute(
     `
-    INSERT INTO requests (uid, request_type, request_status, ccy_id, amount)
-    VALUES (?, ?, ?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?)
+    INSERT INTO requests (uid, request_type, request_status, ccy_id, amount, address)
+    VALUES (?, ?, ?, (SELECT c.id FROM currencies c WHERE c.symbol = ?), ?, ?)
     ON DUPLICATE KEY UPDATE request_status = ?, updated_at = NOW();
   `,
-    [uid, requestType, requestStatus, ccy, amount, requestStatus],
+    [uid, requestType, requestStatus, ccy, amount, address, requestStatus],
   );
 }
