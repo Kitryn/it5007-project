@@ -249,11 +249,12 @@ export default function WalletPage() {
                                 <div className="col-4">
                                     <button
                                         className="btn btn-primary fs-4 w-100"
-                                        onClick={() =>
+                                        onClick={() => {
                                             claimAirdrop().then((res) =>
                                                 console.log(res)
                                             )
-                                        }
+                                            closeModal()
+                                        }}
                                     >
                                         Claim Now
                                     </button>
@@ -264,8 +265,6 @@ export default function WalletPage() {
                     </div>
                 </div>
             </Modal>
-            <button onClick={() => debug_initialise()}>init</button>
-            <button onClick={() => debug_funds()}>fund</button>
         </div>
     )
 }
