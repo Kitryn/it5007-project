@@ -196,31 +196,52 @@ export async function getAirdropStatus(connection: mysql.Connection, uid: string
   return true;
 }
 
-export async function upsertAirdropStatus(
+export async function claimAirdrop(
   connection: mysql.Connection,
   uid: string,
-  aidropId: string,
+  airdropId: string,
 ): Promise<ServerResponse<AirdropResponse>> {
   try {
+    await connection.promise().beginTransaction();
+
+    const [res] = await connection.promise().execute<RowDataPacket[][]>(
+      `
+      SELECT * FROM airdrops
+      WHERE uid = ?
+      AND airdrop_id = ?
+    `,
+      [uid, airdropId],
+    );
+
+    if (res.length !== 0) {
+      // airdrop already claimed
+      await connection.promise().rollback();
+      return {
+        error: {
+          type: "INVALID_ARGUMENTS",
+          message: "Airdrop already claimed",
+        },
+      };
+    }
+
     await connection.promise().execute(
       `
       INSERT INTO airdrops (uid, airdrop_id)
-      VALUES (?, ?)
-      ON DUPLICATE KEY UPDATE updated_at = NOW();
+      VALUES (?, ?);
     `,
-      [uid, aidropId],
+      [uid, airdropId],
     );
+
+    await connection.promise().commit();
+
     return {
       data: {
-        id: aidropId,
+        id: airdropId,
       },
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error(err);
-    return {
-      error: {
-        type: "INVALID_ARGUMENTS",
-      },
-    };
+    await connection.promise().rollback();
+    throw err;
   }
 }
