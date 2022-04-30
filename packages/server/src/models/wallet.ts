@@ -1,5 +1,5 @@
 import mysql, { RowDataPacket } from "mysql2";
-import { History, RequestStatus, RequestType } from "../types";
+import { AirdropResponse, History, RequestStatus, RequestType, ServerResponse } from "../types";
 import { calculateLpTokenShare, getPrice } from "./pool";
 
 export async function upsertBalance(connection: mysql.Connection, uid: string, ccy: string, amount: bigint) {
@@ -196,4 +196,31 @@ export async function getAirdropStatus(connection: mysql.Connection, uid: string
   return true;
 }
 
-export async function upsertAirdropStatus(connection: mysql.Connection, uid: string, aidropId: string): Promise<void> {}
+export async function upsertAirdropStatus(
+  connection: mysql.Connection,
+  uid: string,
+  aidropId: string,
+): Promise<ServerResponse<AirdropResponse>> {
+  try {
+    await connection.promise().execute(
+      `
+      INSERT INTO airdrops (uid, airdrop_id)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE updated_at = NOW();
+    `,
+      [uid, aidropId],
+    );
+    return {
+      data: {
+        id: aidropId,
+      },
+    };
+  } catch (err: any) {
+    console.error(err);
+    return {
+      error: {
+        type: "INVALID_ARGUMENTS",
+      },
+    };
+  }
+}
