@@ -175,7 +175,12 @@ export async function calculateLpTokenShare(
       [ccy1, ccy2, amount.toString(), ccy1, ccy2],
     );
 
-  return rows[0];
+  return {
+    ccy1: rows[0].ccy1,
+    ccy2: rows[0].ccy2,
+    reserve1: new BigNumber(rows[0].reserve1).integerValue().toString(),
+    reserve2: new BigNumber(rows[0].reserve2).integerValue().toString(),
+  };
 }
 
 export async function removeLiquidity(connection: mysql.Connection, uid: string, lpSymbol: string, amount: bigint) {
