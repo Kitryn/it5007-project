@@ -331,10 +331,13 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
     }
 
     const _res = await swap(connection, uid, base, quote, amt.integerValue().toString(), isBuy);
+    if (_res.error != null) {
+      return res.status(403).send(_res);
+    }
     res.send(_res);
   } catch (err: any) {
     console.error(err);
-    res.status(400).send(err.toString()); // don't send err message in real app
+    res.status(500).send(err.toString()); // don't send err message in real app
   }
 });
 

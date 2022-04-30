@@ -487,32 +487,62 @@ export async function swap(
         out.toString(),
       ).dividedBy(EXPONENT.toString())} ${ccy2}`,
     );
-    await connection.promise().query(
-      `
-      UPDATE balances 
-      SET 
-        amount = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount + ?
-                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount - ?
-                        ELSE amount END),
-        updated_at = NOW()
-      WHERE uid = ? AND ccy_id in ((SELECT c.id FROM currencies c WHERE c.symbol = ?), (SELECT c.id FROM currencies c WHERE c.symbol = ?));
-    `,
-      _params,
-    );
+    try {
+      await connection.promise().query(
+        `
+        UPDATE balances 
+        SET 
+          amount = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount + ?
+                          WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN amount - ?
+                          ELSE amount END),
+          updated_at = NOW()
+        WHERE uid = ? AND ccy_id in ((SELECT c.id FROM currencies c WHERE c.symbol = ?), (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+      `,
+        _params,
+      );
+    } catch (err: any) {
+      const { message } = err;
+      if (message == null || !message.includes("Check constraint")) {
+        // delegate to unexpected error handler
+        throw err;
+      }
+      await connection.promise().rollback();
+      return {
+        error: {
+          type: "USER_NO_FUNDS",
+          message: "User have not enough available balance to perform this operation",
+        },
+      };
+    }
 
     // Subtract and add reserve balances
-    await connection.promise().query(
-      `
-      UPDATE reserves
-      SET
-        reserve = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve - ?
-                        WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve + ?
-                        ELSE reserve END),
-        updated_at = NOW()
-      WHERE pair_id = (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?));
-      `,
-      [..._params.slice(0, 4), ccy1, ccy2],
-    );
+    try {
+      await connection.promise().query(
+        `
+        UPDATE reserves
+        SET
+          reserve = (CASE WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve - ?
+                          WHEN ccy_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) THEN reserve + ?
+                          ELSE reserve END),
+          updated_at = NOW()
+        WHERE pair_id = (SELECT p.id FROM pairs p WHERE p.ccy1_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?) AND p.ccy2_id = (SELECT c.id FROM currencies c WHERE c.symbol = ?));
+        `,
+        [..._params.slice(0, 4), ccy1, ccy2],
+      );
+    } catch (err: any) {
+      const { message } = err;
+      if (message == null || !message.includes("Check constraint")) {
+        // delegate to unexpected error handler
+        throw err;
+      }
+      await connection.promise().rollback();
+      return {
+        error: {
+          type: "INSUFFICIENT_LIQUIDITY",
+          message: "Insufficient liquidity",
+        },
+      };
+    }
 
     // Finally add a transaction
     const price = new BigNumber(out.toString()).dividedBy(amount.toString()).toString();
@@ -532,6 +562,7 @@ export async function swap(
     };
   } catch (err: any) {
     console.error(err);
+    console.error(err.message);
     await connection.promise().rollback();
     throw err;
   }
