@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom"
 import AssetTable from "./AssetsTable"
-import walletData from "./WalletData.json"
 import { WALLET } from "./DummyWallet"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
