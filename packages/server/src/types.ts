@@ -63,7 +63,7 @@ export interface SwapResponse {
 }
 
 export interface ResponseError {
-  type: "USER_NO_FUNDS" | "INSUFFICIENT_LIQUIDITY";
+  type: "USER_NO_FUNDS" | "INSUFFICIENT_LIQUIDITY" | "INVALID_ARGUMENTS";
 }
 
 export interface ServerResponse {

@@ -19,7 +19,7 @@ import {
   upsertBalance,
   upsertRequest,
 } from "./models/wallet";
-import { CoinBalance, RequestStatus, RequestType, Wallet } from "./types";
+import { CoinBalance, RequestStatus, RequestType, ResponseError, ServerResponse, Wallet } from "./types";
 import { EXPONENT } from "./constants";
 import BigNumber from "bignumber.js";
 import {
@@ -444,24 +444,28 @@ app.post("/api/unstake", [isLoggedInMiddleware], async (req: Request, res: Respo
  * GET request for getting buy swap quotes
  * URL query params: base, quote, isBuy, and exactly one of amountBase, amountQuote
  */
-app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response<ServerResponse>) => {
   try {
     let { base, quote, amountBase, amountQuote, isBuy } = req.query;
 
+    let error: ResponseError = {
+      type: "INVALID_ARGUMENTS",
+    };
+
     if (base == null || quote == null || isBuy == null) {
-      return res.status(400).send("Missing params");
+      return res.status(400).send({ error });
     }
 
     if (isBuy != "true" && isBuy != "false") {
-      return res.status(400).send("Invalid isBuy");
+      return res.status(400).send({ error });
     }
     const _buy = isBuy === "true";
 
     if (amountBase == null && amountQuote == null) {
-      return res.status(400).send("Missing amount");
+      return res.status(400).send({ error });
     }
     if (amountBase != null && amountQuote != null) {
-      return res.status(400).send("Cannot specify both amountBase and amountQuote");
+      return res.status(400).send({ error });
     }
 
     const amountIsInput = _buy ? amountQuote != null : amountBase != null;
@@ -476,11 +480,15 @@ app.get("/api/quote", [isLoggedInMiddleware], async (req: Request, res: Response
       quoteRes = await getSellQuote(connection, base.toString(), quote.toString(), BigInt(amt), amountIsInput);
     }
 
-    res.send({
-      ...quoteRes,
-      amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
-      amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
-    });
+    const _response = {
+      data: {
+        ...quoteRes,
+        amtCcy1: new BigNumber(quoteRes.amtCcy1).dividedBy(EXPONENT.toString()).toString(),
+        amtCcy2: new BigNumber(quoteRes.amtCcy2).dividedBy(EXPONENT.toString()).toString(),
+      },
+    };
+
+    res.send(_response);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString());
