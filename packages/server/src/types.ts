@@ -44,3 +44,29 @@ export enum RequestStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export interface QuoteResponse {
+  idealPrice: number;
+  actualPrice: number;
+  amtCcy1: string;
+  amtCcy2: string;
+  slippage: number;
+}
+
+export interface SwapResponse {
+  base: string;
+  quote: string;
+  isBuy: boolean;
+  amtBase: string;
+  amtQuote: string;
+  actualPrice: number;
+}
+
+export interface ResponseError {
+  type: "USER_NO_FUNDS" | "INSUFFICIENT_LIQUIDITY";
+}
+
+export interface ServerResponse {
+  data?: QuoteResponse | SwapResponse;
+  error?: ResponseError;
+}
