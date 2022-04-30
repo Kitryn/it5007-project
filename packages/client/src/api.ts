@@ -6,6 +6,7 @@ import {
     Wallet,
     History,
     Quote,
+    ServerResponse,
 } from "./data"
 
 export async function debug_initialise(): Promise<void> {
@@ -276,7 +277,7 @@ export async function getQuote(
     isBuy: boolean,
     amountBase?: number,
     amountQuote?: number
-): Promise<Quote | null> {
+): Promise<ServerResponse<Quote> | null> {
     if (amountBase == null && amountQuote == null) {
         throw new Error(
             "Exactly one of amountBase or amountQuote must be passed"

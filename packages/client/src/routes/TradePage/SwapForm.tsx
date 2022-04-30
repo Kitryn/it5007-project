@@ -94,9 +94,10 @@ const SwapForm = () => {
                 quotation.amountQuote
             )
                 .then((res) => {
-                    if (res) {
-                        setQuotation(res)
-                        console.log(res)
+                    if (res?.data) {
+                        setQuotation(res.data)
+                    } else if (res?.error) {
+                        alert(`${res.error.type}: ${res.error.message}`)
                     }
                 })
                 .catch((err) => {
