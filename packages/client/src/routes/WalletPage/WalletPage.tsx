@@ -115,25 +115,7 @@ export default function WalletPage() {
                                     <div className="col">
                                         <Link
                                             type={"a"}
-                                            to="/trade/buy"
-                                            className="text-decoration-none text-muted"
-                                        >
-                                            Buy
-                                        </Link>
-                                    </div>
-                                    <div className="col">
-                                        <Link
-                                            type={"a"}
-                                            to="/trade/sell"
-                                            className="text-decoration-none text-muted"
-                                        >
-                                            Sell
-                                        </Link>
-                                    </div>
-                                    <div className="col">
-                                        <Link
-                                            type={"a"}
-                                            to="/trade/swap"
+                                            to="/trade"
                                             className="text-decoration-none text-muted"
                                         >
                                             Swap
