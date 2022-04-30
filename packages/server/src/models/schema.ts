@@ -11,3 +11,4 @@ export const SQL_CREATE_TABLE_TRANSACTIONS = fs
   .toString();
 export const SQL_CREATE_TABLE_RESERVES = fs.readFileSync(path.join(__dirname, `./sql/reserves.sql`), "utf8").toString();
 export const SQL_CREATE_TABLE_REQUESTS = fs.readFileSync(path.join(__dirname, `./sql/requests.sql`), "utf8").toString();
+export const SQL_CREATE_TABLE_AIRDROP = fs.readFileSync(path.join(__dirname, `./sql/airdrop.sql`), "utf8").toString();

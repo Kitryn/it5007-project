@@ -12,6 +12,7 @@ import mysql from "mysql2";
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
 import {
+  getAirdropStatus,
   getCoinBalances,
   getLpBalances,
   getLpCoinValues,
@@ -47,6 +48,7 @@ const PORT = process.env.PORT ?? 3000;
 const app = express();
 const HOT_WALLET = "0x0d7b26Bfa1D36e648513a80c8D6172583E7a2c5E";
 const EXCHANGE_ONLY_UID = "exchange-only";
+const NEW_USER_AIRDROP_ID = "new-user-airdrop";
 
 if (process.env.NODE_ENV !== "production") {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(
@@ -131,9 +133,11 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
 /**
  * Get the balance of a user
  */
-app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response<Wallet>) => {
   try {
     const uid = req.decodedToken!.uid;
+
+    const claimed = await getAirdropStatus(connection, uid, NEW_USER_AIRDROP_ID);
 
     const coinBalances = await getCoinBalances(connection, uid);
     const lpValues = await getLpCoinValues(connection, uid);
@@ -212,6 +216,7 @@ app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Respons
       crypto: (totalPortfolioValue - totalFiatValue).toString(),
       coin_qty: Array.from(balMap.values()),
       earning: totalEarning.toString(),
+      claimed,
     };
 
     res.send(wallet);

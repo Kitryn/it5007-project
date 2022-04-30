@@ -178,3 +178,22 @@ export async function upsertRequest(
     [uid, requestType, requestStatus, ccy, amount, address, requestStatus],
   );
 }
+
+export async function getAirdropStatus(connection: mysql.Connection, uid: string, airdropId: string): Promise<boolean> {
+  const [res] = await connection.promise().execute<RowDataPacket[][]>(
+    `
+    SELECT * FROM airdrops
+    WHERE uid = ?
+    AND airdrop_id = ?
+  `,
+    [uid, airdropId],
+  );
+
+  if (res.length === 0) {
+    return false;
+  }
+
+  return true;
+}
+
+export async function upsertAirdropStatus(connection: mysql.Connection, uid: string, aidropId: string): Promise<void> {}
