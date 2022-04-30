@@ -12,6 +12,7 @@ import mysql from "mysql2";
 import { isAdminMiddleware, isLoggedInMiddleware } from "./auth";
 import { createCurrencies, createTables } from "./models/initialiseDb";
 import {
+  claimAirdrop,
   getAirdropStatus,
   getCoinBalances,
   getLpBalances,
@@ -21,6 +22,7 @@ import {
   upsertRequest,
 } from "./models/wallet";
 import {
+  AirdropResponse,
   CoinBalance,
   QuoteResponse,
   RequestStatus,
@@ -129,6 +131,21 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
     res.status(500).send(err.toString());
   }
 });
+
+app.post(
+  "/api/newUserAirdrop",
+  [isLoggedInMiddleware],
+  async (req: Request, res: Response<ServerResponse<AirdropResponse>>) => {
+    try {
+      const uid = req.decodedToken!.uid;
+      const _res = await claimAirdrop(connection, uid, NEW_USER_AIRDROP_ID);
+      res.send(_res);
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).send(err.toString());
+    }
+  },
+);
 
 /**
  * Get the balance of a user
