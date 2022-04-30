@@ -30,58 +30,10 @@ export default function CashPage() {
         <div className="container">
             <div className="card">
                 <div className="row m-0">
-                    <div className="col py-3 border-end">
-                        <button
-                            onClick={(e) =>
-                                onClickHandler(e, {
-                                    isBuy: true,
-                                    isSell: false,
-                                    isSwap: false,
-                                })
-                            }
-                            className={
-                                "cash-btn btn btn-white w-100 fs-1" +
-                                (tabState.isBuy
-                                    ? " text-dark fw-bold"
-                                    : " text-muted")
-                            }
-                        >
-                            Buy
-                        </button>
-                    </div>
                     <div className="col py-3 border-start">
                         <button
-                            onClick={(e) =>
-                                onClickHandler(e, {
-                                    isBuy: false,
-                                    isSell: true,
-                                    isSwap: false,
-                                })
-                            }
                             className={
-                                "cash-btn btn btn-white w-100 fs-1" +
-                                (tabState.isSell
-                                    ? " text-dark fw-bold"
-                                    : " text-muted")
-                            }
-                        >
-                            Sell
-                        </button>
-                    </div>
-                    <div className="col py-3 border-start">
-                        <button
-                            onClick={(e) =>
-                                onClickHandler(e, {
-                                    isBuy: false,
-                                    isSell: false,
-                                    isSwap: true,
-                                })
-                            }
-                            className={
-                                "cash-btn btn btn-white w-100 fs-1" +
-                                (tabState.isSwap
-                                    ? " text-dark fw-bold"
-                                    : " text-muted")
+                                "cash-btn btn btn-white w-100 fs-1 text-dark fw-bold"
                             }
                         >
                             Swap
@@ -89,7 +41,7 @@ export default function CashPage() {
                     </div>
                 </div>
                 <div>
-                    <SwapForm selected={activeTab}></SwapForm>
+                    <SwapForm></SwapForm>
                 </div>
             </div>
         </div>

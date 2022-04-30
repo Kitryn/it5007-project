@@ -1,24 +1,50 @@
 import { useEffect, useRef, useState } from "react"
+import { getPairs } from "../../api"
 import PushableButton from "../../components/UI/PushableButton"
 import "./form.css"
 
-const SwapForm = ({ selected }) => {
-    const selection = ["BTC", "ETH", "COI", "KJS"]
-    const [selectedCurrency, setSelectedCurrency] = useState(selection[0])
+const SwapForm = () => {
+    const [selectedCurrencyPrimary, setSelectedCurrencyPrimary] =
+        useState("SGD")
+    const [selectedCurrencySecondary, setSelectedCurrencySecondary] =
+        useState("BTC")
+    const [pairs, setPairs] = useState<{ base: string; quote: string }[]>()
     const upperRef = useRef<HTMLInputElement>(null)
     const lowerRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        const node = upperRef.current
-        if (node) {
-            node.focus()
-        }
-    }, [selection])
+        getPairs().then((pairs) => {
+            if (pairs) {
+                setPairs(pairs)
+            }
+        })
+    }, [])
 
-    function onSelectHander(e: any) {
-        setSelectedCurrency(e.target.innerText)
+    const primarySelection = pairs ? pairs.map((value) => value.base) : []
+    primarySelection.push("SGD")
+    primarySelection.sort()
+
+    const secondarySelection =
+        selectedCurrencyPrimary === "SGD"
+            ? pairs?.map((val) => val.base)
+            : ["SGD"]
+
+    secondarySelection?.sort()
+
+    function onSelectHanderPrimary(e: any) {
+        setSelectedCurrencyPrimary(e.target.innerText)
+    }
+    function onSelectHanderSecondary(e: any) {
+        setSelectedCurrencySecondary(e.target.innerText)
     }
 
+    useEffect(() => {
+        setSelectedCurrencySecondary(
+            secondarySelection ? secondarySelection[0] : "SGD"
+        )
+    }, [primarySelection])
+
+    const selected = "Swap"
     return (
         <>
             <div
@@ -29,9 +55,7 @@ const SwapForm = ({ selected }) => {
             >
                 <div className="col">
                     <div className="row py-3">
-                        <h4 className="text-white ">
-                            I want to {selected.toLowerCase()}
-                        </h4>
+                        <h4 className="text-white ">I want to swap</h4>
                     </div>
                     <div className="row py-1">
                         <div className="col">
@@ -52,8 +76,10 @@ const SwapForm = ({ selected }) => {
                         <div className="col-3">
                             <div className="btn-group">
                                 <span className="btn btn-primary selection pe-5">
-                                    {selectedCurrency +
-                                        " ".repeat(5 - selectedCurrency.length)}
+                                    {selectedCurrencyPrimary +
+                                        " ".repeat(
+                                            5 - selectedCurrencyPrimary.length
+                                        )}
                                 </span>
                                 <button
                                     type="button"
@@ -66,13 +92,13 @@ const SwapForm = ({ selected }) => {
                                     </span>
                                 </button>
                                 <ul className="dropdown-menu">
-                                    {selection.map((coin) => (
+                                    {primarySelection.map((coin) => (
                                         <li key={coin}>
                                             <a
                                                 className="dropdown-item"
                                                 href="#"
                                                 onClick={(e) =>
-                                                    onSelectHander(e)
+                                                    onSelectHanderPrimary(e)
                                                 }
                                             >
                                                 {coin}
@@ -115,9 +141,10 @@ const SwapForm = ({ selected }) => {
                             <div className="col-3">
                                 <div className="btn-group">
                                     <span className="btn btn-primary selection pe-5">
-                                        {selectedCurrency +
+                                        {selectedCurrencySecondary +
                                             " ".repeat(
-                                                5 - selectedCurrency.length
+                                                5 -
+                                                    selectedCurrencySecondary.length
                                             )}
                                     </span>
                                     <button
@@ -131,13 +158,15 @@ const SwapForm = ({ selected }) => {
                                         </span>
                                     </button>
                                     <ul className="dropdown-menu">
-                                        {selection.map((coin) => (
+                                        {secondarySelection?.map((coin) => (
                                             <li key={coin}>
                                                 <a
                                                     className="dropdown-item"
                                                     href="#"
                                                     onClick={(e) =>
-                                                        onSelectHander(e)
+                                                        onSelectHanderSecondary(
+                                                            e
+                                                        )
                                                     }
                                                 >
                                                     {coin}
