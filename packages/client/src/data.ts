@@ -10,6 +10,7 @@ export interface Wallet {
     fiat: string
     crypto: string
     earning: string
+    claimed?: boolean
     coin_qty: CoinBalance[]
 }
 

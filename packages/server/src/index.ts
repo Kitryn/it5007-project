@@ -133,9 +133,11 @@ app.get("/api/debug/funds", [isLoggedInMiddleware, isAdminMiddleware], async (re
 /**
  * Get the balance of a user
  */
-app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response) => {
+app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Response<Wallet>) => {
   try {
     const uid = req.decodedToken!.uid;
+
+    const claimed = await getAirdropStatus(connection, uid, NEW_USER_AIRDROP_ID);
 
     const coinBalances = await getCoinBalances(connection, uid);
     const lpValues = await getLpCoinValues(connection, uid);
@@ -214,6 +216,7 @@ app.get("/api/wallet", [isLoggedInMiddleware], async (req: Request, res: Respons
       crypto: (totalPortfolioValue - totalFiatValue).toString(),
       coin_qty: Array.from(balMap.values()),
       earning: totalEarning.toString(),
+      claimed,
     };
 
     res.send(wallet);
