@@ -26,6 +26,9 @@ export function getAmountIn(amtOut: bigint, reserveIn: bigint, reserveOut: bigin
   if (reserveIn <= 0n || reserveOut <= 0n) {
     throw new Error("reserveIn and reserveOut must be greater than 0");
   }
+  if (amtOut > reserveOut) {
+    throw new Error("amtOut must be less than or equal to reserveOut");
+  }
 
   const numerator = amtOut * reserveIn * BASIS_POINTS_PERCENT;
   const denominator = (reserveOut - amtOut) * (BASIS_POINTS_PERCENT - LP_FEES_BASIS_POINTS);
