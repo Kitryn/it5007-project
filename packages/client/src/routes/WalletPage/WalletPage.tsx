@@ -1,12 +1,20 @@
 import { Link } from "react-router-dom"
 import AssetTable from "./AssetsTable"
-import { WALLET } from "./DummyWallet"
 import { useEffect, useState } from "react"
 import { Wallet } from "../../data"
-import { debug_funds, debug_initialise, getHistory, getWallet } from "../../api"
+import { debug_funds, debug_initialise, getWallet } from "../../api"
+import Modal from "react-modal"
+
+Modal.setAppElement("#modal")
 
 export default function WalletPage() {
     const [wallet, setWallet] = useState<Wallet>({
+        fiat: "0",
+        crypto: "0",
+        earning: "0",
+        coin_qty: [],
+    })
+    const [walletImage, setWalletImage] = useState<Wallet>({
         fiat: "0",
         crypto: "0",
         earning: "0",
@@ -18,6 +26,7 @@ export default function WalletPage() {
         getWallet().then((wallet) => {
             if (wallet) {
                 setWallet(wallet)
+                setWalletImage(wallet)
             }
         })
     }, [])
@@ -32,12 +41,16 @@ export default function WalletPage() {
     const totalAsset = flatAssets + cryptoAssets
 
     function onSearchSubmitHandler(searchTerm: string) {
-        setWallet({
-            ...WALLET,
-            coin_qty: WALLET.coin_qty.filter((x) =>
-                x.name.toLowerCase().includes(searchTerm)
-            ),
-        })
+        if (searchTerm) {
+            setWalletImage({
+                ...wallet,
+                coin_qty: wallet.coin_qty.filter((x) =>
+                    x.symbol.toLowerCase().includes(searchTerm)
+                ),
+            })
+        } else {
+            setWalletImage(wallet)
+        }
     }
 
     return (
@@ -180,7 +193,7 @@ export default function WalletPage() {
                 <div className="col-7">
                     <div className="card h-100">
                         <AssetTable
-                            cryptoAssets={coins}
+                            cryptoAssets={walletImage.coin_qty}
                             onSearchSubmitHandler={onSearchSubmitHandler}
                         />
                     </div>
