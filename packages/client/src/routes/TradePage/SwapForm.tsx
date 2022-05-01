@@ -316,7 +316,6 @@ const SwapForm = () => {
                         </div>
                     </div>
                 </div>
-                )
             </div>
             <div className="row py-3">
                 {quotation ? (
