@@ -7,6 +7,12 @@ import date from "date-and-time"
 import { getHistory } from "../../api"
 import { History } from "../../data"
 
+const addDays = function (date: Date, days: number) {
+    const result = new Date(date)
+    result.setDate(result.getDate() + days)
+    return result
+}
+
 export default function HistoryPage() {
     const today = new Date()
     const [fromDate, setFromDate] = useState(date.addMonths(today, -3))
@@ -27,7 +33,8 @@ export default function HistoryPage() {
     const filteredHistory = history.filter(
         (val: History) =>
             date.subtract(new Date(val.date), fromDate).toDays() >= 0 &&
-            date.subtract(toDate, new Date(val.date)).toDays() >= 0 &&
+            date.subtract(addDays(toDate, 1), new Date(val.date)).toDays() >=
+                0 &&
             (val.base + val.quote).includes(searchWord)
     )
 
