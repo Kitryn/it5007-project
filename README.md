@@ -16,9 +16,84 @@ $ npm install yarn --global
 
 ## Getting started right away (for Lecturer + TA)
 
-The webapp is already deployed to production: https://mazesoba-345315.web.app
+The webapp is already deployed to the public internet: https://mazesoba-345315.web.app
 
 GitHub URL: [Link to repo](https://github.com/Kitryn/it5007-project)
+
+## TUTORIAL 6 INSTRUCTIONS
+
+This project has been deployed into production with an authenticated `firebase` CLI tool, and authenticated `gcloud` cli tool. A token-based authentication exists for lecturer and TA to use.
+
+Tutorial questions:
+
+1. Setup:
+   - Authentication file in two forms: `firebase-admin.json` for authenticating with Cloud SQL and Cloud Run.
+   - `FIREBASE_TOKEN` in `.env` file -- NOT IN SOURCE CONTROL, but should be in the gzipped file.
+   - Follow the deployment instructions below for testing cloud connectivity.
+2. Installation:
+   - Follow the deployment instructions below. STRONGLY ADVISED TO TEST THE WEBSITE VIA ABOVE PUBLIC LINK BEFORE PLAYING AROUND WITH DEPLOYMENT.
+3. Public accessibility:
+   - Already covered previously: https://mazesoba-345315.web.app
+4. Performance measurement definitions:
+   - FP: First Paint
+     - How long before when users first try to access the website before the page appears
+   - FCP: First Contentful Paint
+     - Similar to the above, but without loading screens - must display pieces of content
+   - FMP: First meaningful paint
+     - Similar to FCP except that it has to be usable to users
+   - DCL: DOM Content Loaded
+     - When the client side browser has fully loaded the DOM and is ready to run Javascript
+5. Performance measurement on Cloud:
+   - FP: 131.2ms
+   - FCP: 174.1ms
+   - DCL: 159.9ms
+   - LCP (Largest Contentful Paint): 240.5ms
+6. Performance measurement on Docker:
+   - FP: 137.4ms
+   - FCP: 172.1ms
+   - DCL: 1006.2ms (maybe querying the cloud SQL?)
+   - LCP: 172.2ms
+7. Comments on performance measurement on Docker vs Cloud
+   - Largely similar, possibly implies that our bundle sizes are small enough that network latency is not a great contributor, but instead the load time of the React runtime.
+   - One notable difference is the DCL which seems to be a lot longer on the local Docker instance. It is possible that the measurement is including the time it took for one of the API queries to return, and since the local Docker instance proxies over its database requests to the Cloud SQL database, this could incur a large network latency compared to when the instance deployed in the cloud queries the SQL database in the cloud. If they live in the same or similar datacenter, the latency would be far less.
+
+### Firebase (Front-end deployment)
+
+Ideally we login with firebase. However for testing, we'll use authentication tokens pre-generated. Contact Yixun or Ding if the tokens don't work.
+
+1. Install the Firebase CLI
+   - `$ npm install --global firebase-tools`
+2. Build the front end -- IMPORTANT! This will output the build artifacts used in production!
+   - `$ yarn client:build`
+3. Copy the `FIREBASE_TOKEN` environment variable from `.env`
+4. Deploy with the Firebase command line
+   - `$ firebase deploy --token="<token>"`
+
+### Google Cloud Run (Back-end deployment)
+
+Again, ideally we login with the `gcloud` cli. For testing, we'll use the service account json `firebase-admin.json` file included in the gzip file.
+
+1. [Set up gcloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
+2. Login with `gcloud` and the `firebase-admin.json` secret file
+   - `$ gcloud auth login --cred-file=./firebase-admin.json`
+3. Deploy with the `gcloud` command line
+   - `$ gcloud run deploy sobaapi --source .`
+   - Specifying the project service name is important as the service definition has been preconfigured with the necessary environment variables
+
+### Google Cloud SQL (MySQL RDBMS)
+
+Instance already set up on the Google Cloud Console GUI. To test connectivity, you need to install the `cloud_sql_proxy` provided by Google. There are some instructions below for how to do so on Windows. If you are on a Unix system (only tested with Ubuntu), it is a lot more straightforward:
+
+- `$ sudo mkdir -p /cloudsql && sudo chmod 777 /cloudsql`
+- `$ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql -credential_file=./firebase-admin.json`
+
+This runs `cloud_sql_proxy` in a docker container and mounts the Unix socket at `/cloudsql`. You can then connect to the DB using your MySQL client of choice, with details:
+
+- Socket/Pipe path: `/cloudsql/mazesoba-345315:asia-southeast1:mazesoba-mysql`
+- Username: `root`
+- Password: `<found inside .env file>`
+
+## TO RUN LOCALLY
 
 To run locally: source control does NOT include the `.env` file or `firebase-admin.json` credentials file. However, it should be included in the zip file provided to yourselves.
 
