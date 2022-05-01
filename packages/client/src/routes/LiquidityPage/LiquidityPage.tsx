@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
+import { useDebounce } from "use-debounce"
 import { getPairs, getPrices, getWallet } from "../../api"
 import PushableButton from "../../components/UI/PushableButton/PushableButton"
 import { CoinBalance, Wallet } from "../../data"
@@ -10,8 +11,25 @@ const LiquidityPage = () => {
     const [price, setPrice] = useState<number | undefined>(undefined)
     const [wallet, setWallet] = useState<{ [key: string]: CoinBalance }>({})
 
-    function onSelectBaseCcy(e: any) {
+    const [upperAmount, setUpperAmount] = useState<number | undefined>(
+        undefined
+    )
+    const [upperAmountDelayed] = useDebounce(upperAmount, 1000)
+
+    const onSelectBaseCcy = (e: any) => {
         setBaseCcy(e.target.innerText)
+    }
+
+    const onUpperInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Ensure the input is a valid number
+        const value = parseFloat(e.target.value)
+        if (!value) {
+            return setUpperAmount(undefined)
+        }
+        if (isNaN(value)) {
+            return
+        }
+        setUpperAmount(value)
     }
 
     // Fetch the list of currencies
@@ -71,7 +89,8 @@ const LiquidityPage = () => {
                         isStatic={false}
                         balance={wallet[baseCcy]?.qty ?? 0}
                         value={wallet[baseCcy]?.value ?? 0}
-                        amount={undefined}
+                        amount={upperAmount}
+                        onAmountHandler={onUpperInputHandler}
                     ></Console>
                     <div className="row m-0 py-3"></div>
                     <Console
@@ -82,7 +101,12 @@ const LiquidityPage = () => {
                         isStatic={true}
                         balance={wallet["SGD"]?.qty ?? 0}
                         value={wallet["SGD"]?.value ?? 0}
-                        amount={0}
+                        amount={
+                            price
+                                ? price * (upperAmountDelayed || 0)
+                                : undefined
+                        }
+                        onAmountHandler={() => {}}
                     ></Console>
                     <div className="row py-3">
                         <div className="col-2"></div>

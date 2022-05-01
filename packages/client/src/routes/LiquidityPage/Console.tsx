@@ -9,6 +9,7 @@ const Console = ({
     balance,
     value,
     amount,
+    onAmountHandler,
 }) => {
     const balanceFormatted = `${
         balance ? parseFloat(balance).toFixed(6) : "0.00"
@@ -67,11 +68,15 @@ const Console = ({
                             placeholder="0.00"
                             autoFocus={autoFocus}
                             disabled={isStatic}
+                            onChange={onAmountHandler}
+                            value={amount || ""}
                         ></input>
                     </div>
                     <div className="col-3">
                         <p className="text-white fs-5 balance">
-                            <span className="">Balance: {balance}</span>
+                            <span className="">
+                                Balance: {balanceFormatted}
+                            </span>
                             <span className="fs-6 balance-value">
                                 ({valueFormatted})
                             </span>
