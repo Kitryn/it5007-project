@@ -26,8 +26,8 @@ This project has been deployed into production with an authenticated `firebase` 
 
 Tutorial questions:
 
-1. Setup:
-   - Authentication file in two forms: `firebase-admin.json` for authenticating with Cloud SQL and Cloud Run.
+1. Setup: Authentication file in two forms:
+   - `firebase-admin.json` for authenticating with Cloud SQL and Cloud Run -- NOT IN SOURCE CONTROL, but should be in the gzipped file.
    - `FIREBASE_TOKEN` in `.env` file -- NOT IN SOURCE CONTROL, but should be in the gzipped file.
    - Follow the deployment instructions below for testing cloud connectivity.
 2. Installation:
