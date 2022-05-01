@@ -100,11 +100,11 @@ const SwapForm = () => {
             if (selectedCurrencyPrimary === "SGD") {
                 quotation.base = selectedCurrencySecondary
                 quotation.amountQuote = upperInputDelayed
-                quotation.isBuy = false
+                quotation.isBuy = true
             } else {
                 quotation.base = selectedCurrencyPrimary
                 quotation.amountBase = upperInputDelayed
-                quotation.isBuy = true
+                quotation.isBuy = false
             }
 
             getQuote(
@@ -148,11 +148,11 @@ const SwapForm = () => {
         if (selectedCurrencyPrimary === "SGD") {
             swap.base = selectedCurrencySecondary
             swap.amount = lowerInputDelayed
-            swap.isBuy = false
+            swap.isBuy = true
         } else {
             swap.base = selectedCurrencyPrimary
             swap.amount = upperInputDelayed
-            swap.isBuy = true
+            swap.isBuy = false
         }
         console.log(swap)
         // console.log(lowerHtmlRef.current?.innerText)
@@ -178,7 +178,7 @@ const SwapForm = () => {
             >
                 <div className="col">
                     <div className="row py-3">
-                        <h4 className="text-white ">I want to swap</h4>
+                        <h4 className="text-white ">I want to sell</h4>
                         <span className="position-absolute start-0 text-white text-end pe-5">
                             Balance: {wallet[selectedCurrencyPrimary]?.qty ?? 0}
                             {` ${selectedCurrencyPrimary}`}
@@ -258,7 +258,7 @@ const SwapForm = () => {
             >
                 <div className="col">
                     <div className="row py-3">
-                        <h4 className="text-white ">with</h4>
+                        <h4 className="text-white ">to buy</h4>
                         <span className="position-absolute start-0 text-white text-end pe-5">
                             Balance:{" "}
                             {wallet[selectedCurrencySecondary]?.qty ?? 0}
