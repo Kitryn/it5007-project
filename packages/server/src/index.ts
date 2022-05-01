@@ -359,7 +359,17 @@ app.post("/api/swap", [isLoggedInMiddleware], async (req: Request, res: Response
     if (_res.error != null) {
       return res.status(403).send(_res);
     }
-    res.send(_res);
+
+    const _output = {
+      ..._res,
+    };
+    _output.data = {
+      ..._output.data!,
+      amtBase: new BigNumber(_output.data!.amtBase).dividedBy(EXPONENT.toString()).toString(),
+      amtQuote: new BigNumber(_output.data!.amtQuote).dividedBy(EXPONENT.toString()).toString(),
+    };
+
+    res.send(_output);
   } catch (err: any) {
     console.error(err);
     res.status(500).send(err.toString()); // don't send err message in real app
