@@ -64,14 +64,15 @@ Ideally we login with firebase. However for testing, we'll use authentication to
 1. Install the Firebase CLI
    - `$ npm install --global firebase-tools`
 2. Build the front end -- IMPORTANT! This will output the build artifacts used in production!
-   - `$ yarn client:build`
+   - Install dependencies first, then build
+   - `$ yarn && yarn client:build`
 3. Copy the `FIREBASE_TOKEN` environment variable from `.env`
 4. Deploy with the Firebase command line
    - `$ firebase deploy --token="<token>"`
 
 ### Google Cloud Run (Back-end deployment)
 
-Again, ideally we login with the `gcloud` cli. For testing, we'll use the service account json `firebase-admin.json` file included in the gzip file.
+We login with the `gcloud` cli. For testing, we'll use the service account json `firebase-admin.json` file included in the gzip file.
 
 1. [Set up gcloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
 2. Login with `gcloud` and the `firebase-admin.json` secret file
