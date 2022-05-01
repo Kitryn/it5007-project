@@ -14,7 +14,11 @@ $ npm install yarn --global
 
 ## Getting started right away (for Lecturer + TA)
 
-Source control does NOT include the `.env` file or `firebase-admin.json` credentials file. However, it should be included in the zip file provided to yourselves.
+The webapp is already deployed to production: https://mazesoba-345315.web.app
+
+GitHub URL: [Link to repo](https://github.com/Kitryn/it5007-project)
+
+To run locally: source control does NOT include the `.env` file or `firebase-admin.json` credentials file. However, it should be included in the zip file provided to yourselves.
 
 The following steps assume you are running on a Unix based system (only tested on Ubuntu, not tested on MacOS). If you are using Windows, please skip this section.
 
