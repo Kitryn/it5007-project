@@ -69,7 +69,7 @@ const Console = ({
                             autoFocus={autoFocus}
                             disabled={isStatic}
                             onChange={onAmountHandler}
-                            value={amount || ""}
+                            value={amount ?? ""}
                         ></input>
                     </div>
                     <div className="col-3">

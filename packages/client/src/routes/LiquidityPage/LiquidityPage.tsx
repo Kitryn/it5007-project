@@ -11,7 +11,7 @@ const LiquidityPage = () => {
     const [price, setPrice] = useState<number | undefined>(undefined)
     const [wallet, setWallet] = useState<{ [key: string]: CoinBalance }>({})
 
-    const [upperAmount, setUpperAmount] = useState<number | undefined>(
+    const [upperAmount, setUpperAmount] = useState<string | undefined>(
         undefined
     )
     const [upperAmountDelayed, upperAmounceDebounceCallback] = useDebounce(
@@ -25,14 +25,18 @@ const LiquidityPage = () => {
 
     const onUpperInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Ensure the input is a valid number
-        const value = parseFloat(e.target.value)
-        if (!value) {
+        const value = Number(e.target.value)
+        console.log(value)
+        if (!value && value != 0 && !isNaN(value)) {
+            console.log("huh")
             return setUpperAmount(undefined)
         }
         if (isNaN(value)) {
             return
         }
-        setUpperAmount(value)
+        console.log("wat")
+        console.log(e.target.value)
+        setUpperAmount(e.target.value)
     }
 
     // Fetch the list of currencies
@@ -86,8 +90,8 @@ const LiquidityPage = () => {
         postAddLiquidity(
             baseCcy,
             "SGD",
-            upperAmountDelayed,
-            price * upperAmountDelayed
+            parseFloat(upperAmountDelayed),
+            price * parseFloat(upperAmountDelayed)
         ).then((success) => {
             console.log("Success: ", success)
             alert(
@@ -135,7 +139,12 @@ const LiquidityPage = () => {
                         value={wallet["SGD"]?.value ?? 0}
                         amount={
                             price
-                                ? price * (upperAmountDelayed || 0)
+                                ? upperAmountDelayed == null ||
+                                  upperAmountDelayed == ""
+                                    ? undefined
+                                    : (
+                                          price * Number(upperAmountDelayed)
+                                      ).toFixed(2)
                                 : undefined
                         }
                         onAmountHandler={() => {}}

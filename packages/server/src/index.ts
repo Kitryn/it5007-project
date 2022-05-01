@@ -582,5 +582,5 @@ app.get("/api/pairs", async (req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Hello world listening on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
