@@ -21,7 +21,7 @@ export default function SearchBar({ setSearchState }) {
                     aria-describedby="inputGroup-sizing-default"
                     placeholder="ETH"
                     onChange={(e) => onChangeHandler(e)}
-                    maxLength={5}
+                    maxLength={3}
                 />
             </div>
         </div>

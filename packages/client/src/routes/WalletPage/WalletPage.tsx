@@ -26,7 +26,6 @@ export default function WalletPage() {
         coin_qty: [],
     })
 
-    const [newUser, setNewUser] = useState<boolean>(false)
     const [modalIsOpen, setIsOpen] = useState(false)
     const customStyles = {
         content: {
@@ -50,7 +49,6 @@ export default function WalletPage() {
                     setWalletImage(wallet)
                     if (!wallet.claimed) {
                         // not claim == new user
-                        setNewUser(true)
                         setIsOpen(true)
                     }
                 }
@@ -87,7 +85,7 @@ export default function WalletPage() {
     return (
         <div className="container">
             <div className="row ">
-                <div className="col-lg-5 col-md-12">
+                <div className="col-lg-5 col-md-12 mb-3">
                     <div className="card">
                         <div className="col bg-primary p-4 text-white">
                             <div className="row">
@@ -201,7 +199,7 @@ export default function WalletPage() {
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-7 col-md-12">
+                <div className="col-lg-7 col-md-12 mb-3">
                     <div className="card h-100">
                         <AssetTable
                             cryptoAssets={walletImage.coin_qty}
@@ -249,9 +247,10 @@ export default function WalletPage() {
                                     <button
                                         className="btn btn-primary fs-4 w-100"
                                         onClick={() => {
-                                            claimAirdrop().then(() =>
+                                            claimAirdrop().then(() => {
+                                                loadData()
                                                 closeModal()
-                                            )
+                                            })
                                         }}
                                     >
                                         Claim Now

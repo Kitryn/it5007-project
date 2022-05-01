@@ -258,7 +258,7 @@ export async function postRemoveLiquidity(
         return false
     }
 
-    if (amount <= 0) {
+    if (amount < 0) {
         console.error("Invalid amount")
         return false
     }
