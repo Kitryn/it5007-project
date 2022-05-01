@@ -34,6 +34,7 @@ The following steps assume you are running on a Unix based system (only tested o
    - Note: `--build` can be omitted for subsquent runs
 5. Start the client frontend, with proxies request to the local back end
    - `$ yarn client:start`
+   - Choose `y` when asked to run on port 3001 instead of 3000
 
 **IF YOU ARE ON WINDOWS, THE FOLLOWING IS UNTESTED BUT SHOULD WORK**
 
