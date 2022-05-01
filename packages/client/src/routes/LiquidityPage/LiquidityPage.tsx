@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useDebounce } from "use-debounce"
-import { getPairs, getPrices, getWallet } from "../../api"
+import { getPairs, getPrices, getWallet, postAddLiquidity } from "../../api"
 import PushableButton from "../../components/UI/PushableButton/PushableButton"
 import { CoinBalance, Wallet } from "../../data"
 import Console from "./Console"
@@ -14,7 +14,10 @@ const LiquidityPage = () => {
     const [upperAmount, setUpperAmount] = useState<number | undefined>(
         undefined
     )
-    const [upperAmountDelayed] = useDebounce(upperAmount, 1000)
+    const [upperAmountDelayed, upperAmounceDebounceCallback] = useDebounce(
+        upperAmount,
+        1000
+    )
 
     const onSelectBaseCcy = (e: any) => {
         setBaseCcy(e.target.innerText)
@@ -66,6 +69,35 @@ const LiquidityPage = () => {
             }
         })
     }, [baseCcy])
+
+    // Reset page
+    const reset = () => {
+        setUpperAmount(undefined)
+        upperAmounceDebounceCallback.flush()
+    }
+
+    // Submit liquidity request
+    const onSubmitHandler = (e: React.FormEvent) => {
+        e.preventDefault()
+        console.log("Submit liquidity request")
+        if (upperAmountDelayed == null || price == null) {
+            return
+        }
+        postAddLiquidity(
+            baseCcy,
+            "SGD",
+            upperAmountDelayed,
+            price * upperAmountDelayed
+        ).then((success) => {
+            console.log("Success: ", success)
+            alert(
+                success
+                    ? "Successfully added liquidity"
+                    : "Failed to add liquidity"
+            )
+            reset()
+        })
+    }
 
     return (
         <>
@@ -137,7 +169,9 @@ const LiquidityPage = () => {
                                 </div> */}
                             </div>
                             <div className="row pt-3">
-                                <PushableButton onClickHandler={() => null}>
+                                <PushableButton
+                                    onClickHandler={onSubmitHandler}
+                                >
                                     Approve
                                 </PushableButton>
                             </div>
