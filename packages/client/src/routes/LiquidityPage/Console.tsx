@@ -8,8 +8,12 @@ const Console = ({
     isStatic,
     balance,
     value,
+    amount,
 }) => {
-    const valueFormatted = `$${value ? value.toFixed(2) : "0.00"}`
+    const balanceFormatted = `${
+        balance ? parseFloat(balance).toFixed(6) : "0.00"
+    }`
+    const valueFormatted = `$${value ? parseFloat(value).toFixed(2) : "0.00"}`
 
     return (
         <div className="row m-0 bg-primary" style={{ height: "200px" }}>
@@ -65,8 +69,8 @@ const Console = ({
                             disabled={isStatic}
                         ></input>
                     </div>
-                    <div className="col-2">
-                        <p className="text-white fs-4 balance">
+                    <div className="col-3">
+                        <p className="text-white fs-5 balance">
                             <span className="">Balance: {balance}</span>
                             <span className="fs-6 balance-value">
                                 ({valueFormatted})

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react"
-import { getPairs, getPrices } from "../../api"
+import { getPairs, getPrices, getWallet } from "../../api"
 import PushableButton from "../../components/UI/PushableButton/PushableButton"
+import { CoinBalance, Wallet } from "../../data"
 import Console from "./Console"
 import "./style.css"
 const LiquidityPage = () => {
     const [baseCcy, setBaseCcy] = useState<string>("BTC")
     const [pairs, setPairs] = useState<string[]>(["BTC"])
     const [price, setPrice] = useState<number | undefined>(undefined)
+    const [wallet, setWallet] = useState<{ [key: string]: CoinBalance }>({})
 
     function onSelectBaseCcy(e: any) {
         setBaseCcy(e.target.innerText)
@@ -19,6 +21,20 @@ const LiquidityPage = () => {
             const pairs = res?.map((pair) => pair.base)
             if (pairs) {
                 setPairs(pairs)
+            }
+        })
+    }, [])
+
+    // Fetch current wallet
+    useEffect(() => {
+        getWallet().then((wallet) => {
+            if (wallet) {
+                setWallet(
+                    wallet.coin_qty.reduce((acc, curr) => {
+                        acc[curr.symbol] = curr
+                        return acc
+                    }, {})
+                )
             }
         })
     }, [])
@@ -53,63 +69,56 @@ const LiquidityPage = () => {
                         onSelectHander={onSelectBaseCcy}
                         autoFocus={true}
                         isStatic={false}
-                        balance={100}
-                        value={100}
+                        balance={wallet[baseCcy]?.qty ?? 0}
+                        value={wallet[baseCcy]?.value ?? 0}
+                        amount={undefined}
                     ></Console>
                     <div className="row m-0 py-3"></div>
                     <Console
-                        token={baseCcy}
-                        selection={pairs}
-                        onSelectHander={onSelectBaseCcy}
+                        token={"SGD"}
+                        selection={[]}
+                        onSelectHander={() => {}}
                         autoFocus={false}
                         isStatic={true}
-                        balance={100}
-                        value={100.123}
+                        balance={wallet["SGD"]?.qty ?? 0}
+                        value={wallet["SGD"]?.value ?? 0}
+                        amount={0}
                     ></Console>
                     <div className="row py-3">
-                        {baseCcy && baseCcy ? (
-                            <>
-                                <div className="col-2"></div>
-                                <div className="col-8">
-                                    <div className="row border-bottom text-muted fs-4 ">
-                                        <div className="col">
-                                            <p className="text-start">Rate</p>
-                                        </div>
-                                        <div className="col">
-                                            <p className="text-end">
-                                                <span>1 {baseCcy} </span>
-                                                <span>=</span>
-                                                <span>0.000001 {baseCcy}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="row text-muted fs-4 pt-3">
-                                        <div className="col">
-                                            <p className="text-start">
-                                                Share of pool
-                                            </p>
-                                        </div>
-                                        <div className="col">
-                                            <p className="text-end">0.02%</p>
-                                        </div>
-                                    </div>
-                                    <div className="row pt-3">
-                                        <PushableButton
-                                            onClickHandler={() => null}
-                                        >
-                                            Approve
-                                        </PushableButton>
-                                    </div>
+                        <div className="col-2"></div>
+                        <div className="col-8">
+                            <div className="row border-bottom text-muted fs-4 ">
+                                <div className="col">
+                                    <p className="text-start">Rate</p>
                                 </div>
-                                <div className="col-2"></div>
-                            </>
-                        ) : (
-                            <div className="row text-center p-1 ">
-                                <span className="text-secondary ">
-                                    <em>Please select a token to begin</em>
-                                </span>
+                                <div className="col">
+                                    <p className="text-end">
+                                        <span>1 {baseCcy}</span>
+                                        <span> = </span>
+                                        <span>
+                                            {parseFloat(
+                                                price?.toString() ?? "0"
+                                            ).toFixed(2)}{" "}
+                                            {"SGD"}
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
-                        )}
+                            <div className="row text-muted fs-4 pt-3">
+                                {/* <div className="col">
+                                    <p className="text-start">Share of pool</p>
+                                </div>
+                                <div className="col">
+                                    <p className="text-end">0.02%</p>
+                                </div> */}
+                            </div>
+                            <div className="row pt-3">
+                                <PushableButton onClickHandler={() => null}>
+                                    Approve
+                                </PushableButton>
+                            </div>
+                        </div>
+                        <div className="col-2"></div>
                     </div>
                 </div>
             </div>
