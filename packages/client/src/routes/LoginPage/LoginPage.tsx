@@ -83,7 +83,7 @@ const LoginPage = () => {
                             style={{ height: 200 }}
                         >
                             <div className="col text-center">
-                                Create by Ding Ming & Chen Yixun
+                                Created by Ding Ming & Chen Yixun
                             </div>
                         </div>
                         <div className="row text-muted ">
