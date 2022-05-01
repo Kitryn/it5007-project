@@ -6,5 +6,19 @@ services:
       context: .
     ports:
       - 3000:3000
+    volumes:
+      - /cloudsql:/cloudsql
     environment:
       - PORT=3000
+    depends_on:
+      - sqlproxy
+
+  sqlproxy:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.30.0
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/config
+      - /cloudsql:/cloudsql
+    ports:
+      - "3306:3306"
+    command: >
+      /cloud_sql_proxy -dir=/cloudsql -instances=${INSTANCE_CONNECTION_NAME} -credential_file=/config
