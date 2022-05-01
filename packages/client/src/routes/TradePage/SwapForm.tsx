@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { clearTimeout } from "timers"
-import { getPairs, getQuote, postSwap } from "../../api"
+import { getPairs, getQuote, getWallet, postSwap } from "../../api"
 import PushableButton from "../../components/UI/PushableButton"
 import "./form.css"
 import { useDebounce } from "use-debounce"
-import { Quote } from "../../data"
+import { CoinBalance, Quote } from "../../data"
 
 const SwapForm = () => {
     const [selectedCurrencyPrimary, setSelectedCurrencyPrimary] =
@@ -21,6 +21,8 @@ const SwapForm = () => {
     const lowerHtmlRef = useRef<HTMLInputElement>(null)
     const [quotation, setQuotation] = useState<Quote>()
 
+    const [wallet, setWallet] = useState<{ [key: string]: CoinBalance }>({})
+
     useEffect(() => {
         getPairs().then((pairs) => {
             if (pairs) {
@@ -29,6 +31,23 @@ const SwapForm = () => {
                 )
             }
         })
+    }, [])
+
+    // Fetch current wallet
+    const refreshWallet = async () => {
+        const _wallet = await getWallet()
+        if (_wallet) {
+            setWallet(
+                _wallet.coin_qty.reduce((acc, curr) => {
+                    acc[curr.symbol] = curr
+                    return acc
+                }, {})
+            )
+        }
+    }
+
+    useEffect(() => {
+        refreshWallet()
     }, [])
 
     function onSelectHanderPrimary(e: any) {
@@ -44,6 +63,7 @@ const SwapForm = () => {
         if (node) {
             node.value = ""
         }
+        setTimeout(() => refreshWallet(), 100)
     }
 
     useEffect(() => {
@@ -143,7 +163,7 @@ const SwapForm = () => {
                 resetState()
             } else if (res?.data) {
                 // TODO: Show some feedback, modal?
-                alert(`transcation success`)
+                alert(`transaction success`)
             }
         })
         resetState()
@@ -159,6 +179,10 @@ const SwapForm = () => {
                 <div className="col">
                     <div className="row py-3">
                         <h4 className="text-white ">I want to swap</h4>
+                        <span className="position-absolute start-0 text-white text-end pe-5">
+                            Balance: {wallet[selectedCurrencyPrimary]?.qty ?? 0}
+                            {` ${selectedCurrencyPrimary}`}
+                        </span>
                     </div>
                     <div className="row py-1">
                         <div className="col">
@@ -235,6 +259,11 @@ const SwapForm = () => {
                 <div className="col">
                     <div className="row py-3">
                         <h4 className="text-white ">with</h4>
+                        <span className="position-absolute start-0 text-white text-end pe-5">
+                            Balance:{" "}
+                            {wallet[selectedCurrencySecondary]?.qty ?? 0}
+                            {` ${selectedCurrencySecondary}`}
+                        </span>
                     </div>
                     <div className="row py-1">
                         <div className="col">
