@@ -325,11 +325,30 @@ const SwapForm = () => {
                         <div className="col-8">
                             <div className="row text-muted fs-3 pt-3">
                                 <div className="col">
-                                    <p className="text-start">Price</p>
+                                    <p className="text-start">Ideal Price</p>
                                 </div>
                                 <div className="col">
                                     <p className="text-end">
-                                        1{selectedCurrencySecondary}@
+                                        1
+                                        {selectedCurrencyPrimary === "SGD"
+                                            ? selectedCurrencySecondary
+                                            : selectedCurrencyPrimary}
+                                        {" @ "}
+                                        {quotation?.idealPrice.toFixed(2)} SGD
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="row text-muted fs-3 pt-3">
+                                <div className="col">
+                                    <p className="text-start">Actual Price</p>
+                                </div>
+                                <div className="col">
+                                    <p className="text-end">
+                                        1
+                                        {selectedCurrencyPrimary === "SGD"
+                                            ? selectedCurrencySecondary
+                                            : selectedCurrencyPrimary}
+                                        {" @ "}
                                         {quotation?.actualPrice.toFixed(2)} SGD
                                     </p>
                                 </div>
@@ -337,7 +356,7 @@ const SwapForm = () => {
                             <div className="row text-muted fs-3 pt-3">
                                 <div className="col">
                                     <p className="text-start">
-                                        Slippage{" "}
+                                        Slippage:{" "}
                                         {(
                                             Math.abs(quotation.slippage) * 100
                                         ).toFixed(1)}
@@ -346,13 +365,15 @@ const SwapForm = () => {
                                 </div>
                                 <div className="col">
                                     <p className="text-end">
-                                        {(
-                                            Math.abs(
-                                                quotation.actualPrice -
-                                                    quotation.idealPrice
-                                            ) * parseFloat(quotation.amtCcy1)
+                                        {Math.abs(
+                                            quotation.actualPrice -
+                                                quotation.idealPrice
                                         ).toFixed(2)}{" "}
-                                        SGD
+                                        SGD (
+                                        {(
+                                            Math.abs(quotation.slippage) * 100
+                                        ).toFixed(1)}
+                                        %)
                                     </p>
                                 </div>
                             </div>
