@@ -7,7 +7,10 @@ const Console = ({
     autoFocus,
     isStatic,
     balance,
+    value,
 }) => {
+    const valueFormatted = `$${value ? value.toFixed(2) : "0.00"}`
+
     return (
         <div className="row m-0 bg-primary" style={{ height: "200px" }}>
             <div className="px-5">
@@ -65,6 +68,9 @@ const Console = ({
                     <div className="col-2">
                         <p className="text-white fs-4 balance">
                             <span className="">Balance: {balance}</span>
+                            <span className="fs-6 balance-value">
+                                ({valueFormatted})
+                            </span>
                         </p>
                     </div>
                 </div>

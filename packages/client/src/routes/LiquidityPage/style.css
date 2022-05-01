@@ -13,8 +13,13 @@
 
 .liquidity .balance span {
     position: absolute;
-    bottom: 0;
+    bottom: 20px;
 }
+
+.liquidity .balance span.balance-value {
+    bottom: 0px;
+}
+
 .liquidity .selected-token {
     background-color: rgba(255, 255, 255, 0.5);
 }

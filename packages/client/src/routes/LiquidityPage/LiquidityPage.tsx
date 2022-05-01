@@ -54,6 +54,7 @@ const LiquidityPage = () => {
                         autoFocus={true}
                         isStatic={false}
                         balance={100}
+                        value={100}
                     ></Console>
                     <div className="row m-0 py-3"></div>
                     <Console
@@ -63,6 +64,7 @@ const LiquidityPage = () => {
                         autoFocus={false}
                         isStatic={true}
                         balance={100}
+                        value={100.123}
                     ></Console>
                     <div className="row py-3">
                         {baseCcy && baseCcy ? (
