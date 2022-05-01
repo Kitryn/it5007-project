@@ -4,21 +4,14 @@ import "./HistoryPage.css"
 export default function HistoryRow({ fill }: { fill: History }) {
     const direction = +fill.amt < 0
     const textStyle = direction ? "text-danger" : "text-success"
-    const name = !direction
-        ? fill.base + "/" + fill.quote
-        : fill.quote + "/" + fill.base
+    const name = `${fill.base} / ${fill.quote}`
 
-    const transcation = !direction
-        ? parseFloat(fill.amt).toFixed(5) +
-          fill.base +
-          " @ " +
-          parseFloat(fill.price).toFixed(5) +
-          fill.quote
-        : parseFloat(fill.price).toFixed(5) +
-          fill.quote +
-          " @ " +
-          parseFloat(fill.amt).toFixed(5) +
-          fill.base
+    const transcation =
+        parseFloat(fill.amt).toFixed(5) +
+        fill.base +
+        " @ " +
+        parseFloat(fill.price).toFixed(5) +
+        fill.quote
     console.log(transcation)
 
     return (
