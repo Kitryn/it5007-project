@@ -1,18 +1,37 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { getPairs, getPrices } from "../../api"
 import PushableButton from "../../components/UI/PushableButton/PushableButton"
 import Console from "./Console"
 import "./style.css"
 const LiquidityPage = () => {
-    const selection = ["BTC", "ETH", "COI", "KJS"]
-    const [token1, setToken1] = useState("")
-    const [token2, setToken2] = useState("")
+    const [baseCcy, setBaseCcy] = useState<string>("BTC")
+    const [pairs, setPairs] = useState<string[]>(["BTC"])
+    const [price, setPrice] = useState<number | undefined>(undefined)
 
-    function onSelectHanderToken1(e: any) {
-        setToken1(e.target.innerText)
+    function onSelectBaseCcy(e: any) {
+        setBaseCcy(e.target.innerText)
     }
-    function onSelectHanderToken2(e: any) {
-        setToken2(e.target.innerText)
-    }
+
+    // Fetch the list of currencies
+    useEffect(() => {
+        getPairs().then((res) => {
+            // Quote is always SGD
+            const pairs = res?.map((pair) => pair.base)
+            if (pairs) {
+                setPairs(pairs)
+            }
+        })
+    }, [])
+
+    // Fetch price for the currently selected asset
+    useEffect(() => {
+        getPrices([baseCcy]).then((res) => {
+            const price = res?.[0].price
+            if (price) {
+                setPrice(price)
+            }
+        })
+    }, [baseCcy])
 
     return (
         <>
@@ -29,20 +48,24 @@ const LiquidityPage = () => {
                         </div>
                     </div>
                     <Console
-                        token={token1}
-                        selection={selection}
-                        onSelectHander={onSelectHanderToken1}
+                        token={baseCcy}
+                        selection={pairs}
+                        onSelectHander={onSelectBaseCcy}
                         autoFocus={true}
+                        isStatic={false}
+                        balance={100}
                     ></Console>
                     <div className="row m-0 py-3"></div>
                     <Console
-                        token={token2}
-                        selection={selection}
-                        onSelectHander={onSelectHanderToken2}
+                        token={baseCcy}
+                        selection={pairs}
+                        onSelectHander={onSelectBaseCcy}
                         autoFocus={false}
+                        isStatic={true}
+                        balance={100}
                     ></Console>
                     <div className="row py-3">
-                        {token1 && token2 ? (
+                        {baseCcy && baseCcy ? (
                             <>
                                 <div className="col-2"></div>
                                 <div className="col-8">
@@ -52,9 +75,9 @@ const LiquidityPage = () => {
                                         </div>
                                         <div className="col">
                                             <p className="text-end">
-                                                <span>1 {token1} </span>
+                                                <span>1 {baseCcy} </span>
                                                 <span>=</span>
-                                                <span>0.000001 {token2}</span>
+                                                <span>0.000001 {baseCcy}</span>
                                             </p>
                                         </div>
                                     </div>
