@@ -119,3 +119,7 @@ $ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:maze
 
 - Stores withdrawal requests
 - Foreign key constraint `ccy_id` to `currencies.id`
+
+7. **airdrops**
+
+- Stores whether or not a user has claimed a specific airdrop (e.g. first time user)
