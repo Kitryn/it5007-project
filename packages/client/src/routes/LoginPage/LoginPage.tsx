@@ -29,16 +29,44 @@ const LoginPage = () => {
                         </h3>
                         <div className="row text-dark mb-3">
                             <div className="col-1">
-                                <i className="bi bi-twitter"></i>
+                                <a
+                                    href="https://twitter.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-dark"
+                                >
+                                    <i className="bi bi-twitter"></i>
+                                </a>
                             </div>
                             <div className="col-1">
-                                <i className="bi bi-twitch"></i>
+                                <a
+                                    href="https://www.discord.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-dark"
+                                >
+                                    <i className="bi bi-discord"></i>
+                                </a>
                             </div>
                             <div className="col-1">
-                                <i className="bi bi-facebook"></i>
+                                <a
+                                    href="https://facebook.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-dark"
+                                >
+                                    <i className="bi bi-facebook"></i>
+                                </a>
                             </div>
                             <div className="col-1">
-                                <i className="bi bi-reddit"></i>
+                                <a
+                                    href="https://reddit.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-dark"
+                                >
+                                    <i className="bi bi-reddit"></i>
+                                </a>
                             </div>
                             <div className="col-8"></div>
                         </div>
