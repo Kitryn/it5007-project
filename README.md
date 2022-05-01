@@ -6,6 +6,8 @@ This project uses yarn workspaces to segregate client and server. It assumes you
 
 ## Local development
 
+This project requires Node version `>=16`. We use `16.13` in local development, and docker base image `node:16-alpine` in production.
+
 ### Set up `yarn`
 
 ```
