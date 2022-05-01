@@ -85,7 +85,7 @@ export default function WalletPage() {
     return (
         <div className="container">
             <div className="row ">
-                <div className="col-lg-5 col-md-12">
+                <div className="col-lg-5 col-md-12 mb-3">
                     <div className="card">
                         <div className="col bg-primary p-4 text-white">
                             <div className="row">
@@ -199,7 +199,7 @@ export default function WalletPage() {
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-7 col-md-12">
+                <div className="col-lg-7 col-md-12 mb-3">
                     <div className="card h-100">
                         <AssetTable
                             cryptoAssets={walletImage.coin_qty}

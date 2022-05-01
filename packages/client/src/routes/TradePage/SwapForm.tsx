@@ -134,7 +134,7 @@ const SwapForm = () => {
             swap.amount = upperInputDelayed
             swap.isBuy = true
         }
-        // console.log(swap)
+        console.log(swap)
         // console.log(lowerHtmlRef.current?.innerText)
 
         postSwap(swap.base, swap.quote, swap.amount, swap.isBuy).then((res) => {
@@ -232,7 +232,6 @@ const SwapForm = () => {
                     height: 180,
                 }}
             >
-                (
                 <div className="col">
                     <div className="row py-3">
                         <h4 className="text-white ">with</h4>

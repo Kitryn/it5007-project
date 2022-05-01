@@ -4,7 +4,6 @@ import SearchBar from "../../components/SearchBar"
 import "./HistoryPage.css"
 import React, { useEffect, useState } from "react"
 import date from "date-and-time"
-import { PLACEHOLDER_HISTORY } from "./fixture"
 import { getHistory } from "../../api"
 import { History } from "../../data"
 
@@ -53,10 +52,10 @@ export default function HistoryPage() {
                 <div className="col-12 h-100 container-fluid text-muted">
                     <div className="row">
                         <div className="col-2 bg-white border  history-header-element">
-                            Name
+                            Transaction
                         </div>
                         <div className="col-3 bg-white border  history-header-element">
-                            Amount
+                            Est. Value (SGD)
                         </div>
                         <div className="col-4 bg-white border  history-header-element">
                             Filled
