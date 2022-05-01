@@ -26,7 +26,6 @@ export default function WalletPage() {
         coin_qty: [],
     })
 
-    const [newUser, setNewUser] = useState<boolean>(false)
     const [modalIsOpen, setIsOpen] = useState(false)
     const customStyles = {
         content: {
@@ -50,7 +49,6 @@ export default function WalletPage() {
                     setWalletImage(wallet)
                     if (!wallet.claimed) {
                         // not claim == new user
-                        setNewUser(true)
                         setIsOpen(true)
                     }
                 }
@@ -249,9 +247,10 @@ export default function WalletPage() {
                                     <button
                                         className="btn btn-primary fs-4 w-100"
                                         onClick={() => {
-                                            claimAirdrop().then(() =>
+                                            claimAirdrop().then(() => {
+                                                loadData()
                                                 closeModal()
-                                            )
+                                            })
                                         }}
                                     >
                                         Claim Now
