@@ -58,7 +58,7 @@ export default function HistoryPage() {
                             Est. Value (SGD)
                         </div>
                         <div className="col-4 bg-white border  history-header-element">
-                            Filled
+                            Order
                         </div>
                         <div className="col-3 bg-white border  history-header-element">
                             Time
