@@ -12,6 +12,37 @@ This project uses yarn workspaces to segregate client and server. It assumes you
 $ npm install yarn --global
 ```
 
+## Getting started right away (for Lecturer + TA)
+
+Source control does NOT include the `.env` file or `firebase-admin.json` credentials file. However, it should be included in the zip file provided to yourselves.
+
+The following steps assume you are running on a Unix based system (only tested on Ubuntu, not tested on MacOS). If you are using Windows, please skip this section.
+
+1. Install the project
+   - `$ yarn`
+2. Ensure you have the `.env` and `firebase-admin.json` files in the project root
+3. Ensure you have `cloud_sql_proxy` permissions
+   - `$ mkdir -p /cloudsql && sudo chmod 777 /cloudsql`
+4. Run the development `docker-compose container`. This creates a unix socket in `/cloudsql` for directly talking to production database, authenticating with `firebase-admin.json`
+   - `$ sudo docker-compose up --abort-on-container-exit --exit-code-from webapp --build`
+   - Note: `--build` can be omitted for subsquent runs
+5. Start the client frontend, with proxies request to the local back end
+   - `$ yarn client:start`
+
+**IF YOU ARE ON WINDOWS, THE FOLLOWING IS UNTESTED BUT SHOULD WORK**
+
+1. Download `cloud_sql_proxy.exe` from google: https://dl.google.com/cloudsql/cloud_sql_proxy_x64.exe into the project root
+2. If you are on powershell:
+   - `> $env:GOOGLE_APPLICATION_CREDENTIALS=".\firebase-admin.json"`
+   - `> .\cloud_sql_proxy.exe -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql=tcp:3306 -credential_file=.\firebase-admin.json`
+   - `> yarn server:dev`
+   - Then in a new window:
+   - `> yarn client:start`
+3. If you are on `cmd` instead of powershell, set the environment variable with this instead:
+   - `> set GOOGLE_APPLICATION_CREDENTIALS=".\firebase-admin.json"`
+
+## Development instructions
+
 ### Setting up gcloud and firebase
 
 1. [Set up gcloud CLI](https://cloud.google.com/sdk/docs/install-sdk)
@@ -31,6 +62,7 @@ $ firebase login
 6. Deploy when ready
 
 ```
+$ yarn client:build
 $ firebase deploy
 ```
 
@@ -46,44 +78,33 @@ $ firebase deploy
 
 Frontend client project, initialised with `yarn create react-app client --template typescript`.
 
-Feel free to rip this entire thing out to scaffold from scratch; the only requirement is that it builds into a `/build` folder (which will be served by the backend).
-
 ### packages/server
 
-express.js based backend. Pending addition of MongoDB
+express.js based backend. Talks with MySQL hosted on Google Cloud SQL
 
 ### Local development
 
+To proxy over to production:
+
 ```bash
+$ mkdir -p /cloudsql && sudo chmod 777 /cloudsql
 $ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql -credential_file=./firebase-admin.json
 ```
 
 ### Running client locally with docker
 
-```
-$ docker build --tag mazesoba .
-$ docker run --init -it --publish 3000:3000 mazesoba
-
-```
-
-Or for local server development with live code reload on server:
+For local server development with live code reload on server:
 
 ```
 $ docker-compose up --abort-on-container-exit --exit-code-from webapp --build
 ```
 
+Note that `docker-compose` also starts up the cloud sql proxy.
+
+### Deploying the backend to production
+
 ```
 $ gcloud run deploy sobaapi --source .
->> https://sobaapi-bovnkkpola-as.a.run.app
-```
-
-Local dev with cloud_sql_proxy
-
-```bash
-$ sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
-
-# For socket usage for local dev server
-$ cloud_sql_proxy -dir=/cloudsql -instances=mazesoba-345315:asia-southeast1:mazesoba-mysql -credential_file=./firebase-admin.json
 ```
 
 # Database schema
